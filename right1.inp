@@ -1,0 +1,19 @@
+36+28;
+
+fun length(y : int list) = let val result : int ref =ref 0; 
+                               val p_y : int list ref =ref y  in
+                              while not (!p_y = []) do
+                                  ( result := !result + 1; p_y := tl(!p_y) );
+                              !result
+                            end;
+
+fun gcd(x : int ,y : int ) = if x = y then x
+          else if (x > y) then gcd(y, x-y) else gcd(x, y-x);
+
+let val a = ref 2.0;  val b = ref 3.0
+in
+  a := !a + !b;
+  b := !a * !a;
+  b
+end;
+

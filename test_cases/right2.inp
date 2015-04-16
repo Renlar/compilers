@@ -1,0 +1,219 @@
+fun qux(a : int, b : int) = a + b;
+qux(1,2);
+qux(1, 2);
+qux(1 , 2);
+
+val z = 2;
+
+z;
+
+fun abc_123_ABC_1aA2Aa(a:int) = a;
+abc_123_ABC_1aA2Aa(3);
+
+(1 + 2);
+
+fun quux(a : int list) = a(1);
+
+let fun square (y:real) = y * y;
+    val answer : real ref = ref 0 in
+	answer := square(2.5);
+	!answer
+end;
+
+let val sumlist : int list ref = [1,2,3,4,5];
+    val sum : int ref = ref 0 in
+	while not (!sumlist = []) do
+		sum := !sum + hd(!sumlist);
+	!sum
+end;
+
+val x : real ref = ref 3.6;
+val z : real list ref = [];
+if ((!x < 4) and (!x > 3)) then 
+	z := !z :: !x
+	else
+	x := !x / 2;
+if ((!x = 0) or (!z = [])) then
+	(x := 6 - 1; z := [1])
+	else
+	z := !x :: !z;
+fun noargs () = tl(z);
+fun manyargs (first:int, second:int) = first - second;
+manyargs(4,2);
+val notype = z;
+
+3+4;
+4/2;
+
+25+25;
+let val a = ref 2
+in
+a + 3;
+a + 1
+end;
+while (a+b) do
+(a+b);
+fun fun1() = 1;
+fun1();
+
+val a = (if a then b else c);
+(if a then b else c) + (if b then c else d);
+val a = [1,2,3];
+a = tl((b+c*2));
+while ( if a then b else c) do
+(a+b);
+while (if a then b else c) do
+(a + b);
+while ( (a+b) or (c+d)) do
+(!1);
+
+b:=a+1;c:=b-d/b;e:=d*d;f=ref e;
+
+val a : int list ref ref list list ref = 0;
+
+2 + 3 * 4;
+fun append(xs: int,ys: int) =
+let val rxs = ref (reverse(xs)); val res = ref ys
+in while not(!rxs) do
+(res := hd(!rxs):: !res; rxs := tl(!rxs) );
+!res
+end;
+
+45.542 - .402 * (27 / (7.1));
+
+fun fact_rec(x: int) = if x=0 then 1 else x*fact(x-1);
+fun fact_iter(x: int) = let val i = ref x; val f = 1 in
+  (while !i > 1 do (f = f * !i; !i = !i - 1));
+  f
+end;
+
+let val i=5 in print(fact_rec(i)) end;
+
+val foo: real ref list list = [];
+tl(foo);
+hd(foo);
+foo := [[ref 5.0]];
+
+val bar = [5, 1, 7];
+foo :: bar and 5<1 or (1>0 and not 5=2);
+
+val zed: int list list ref list = let val zedd: int = 42 / (not 100 + !!exci) in 4 end;
+
+36+28;
+
+fun length(y : int list) = let val result : int ref =ref 0; 
+                               val p_y : int list ref =ref y  in
+                              while not (!p_y = []) do
+                                  ( result := !result + 1; p_y := tl(!p_y) );
+                              !result
+                            end;
+
+fun gcd(x : int ,y : int ) = if x = y then x
+          else if (x > y) then gcd(y, x-y) else gcd(x, y-x);
+
+let val a = ref 2.0;  val b = ref 3.0
+in
+  a := !a + !b;
+  b := !a * !a;
+  b
+end;
+
+18 + 30;
+12 - 10;
+8 * 8;
+7 / 4;
+val stuff = 3;
+
+1;
+123;
+2.3;
+22.33;
+x;
+[1,2,3,[1,2]];
+[1,2,3];
+[];
+[a,a+b,b];
+a:=[];
+a:=[a];
+a:=[a+b,[a,b]];
+a:=a<b;
+a:=a>b;
+a:=a+b;
+a:=a-b;
+a:=a*b;
+a:=a/b;
+!a;
+!((a+b)<(a*b));
+hd(a);
+tl(b);
+a:=1;a:=2;
+a:=b:=2;
+while(a < 10) do a:= a + 1;
+if(a>10)then a else 10;
+let val a = ref 802.11; val b = 5 in a+b end;
+lcd(a,b);
+add(a,b);
+add(10,10);
+subtract(100,1);
+a:=a::b;
+
+fun Append1(xs: int,ys :int) = let val rx = ref xs;
+	val ry = ref ys
+	in while not (!rx)
+	do
+	(
+		ry := hd(!rx);
+		rx := tl(!rx)
+	);
+	!ry
+	end;
+
+3;
+
+3.523;
+
+2+3;
+
+aVariable:=7-6;
+
+5   *        	4   ;
+
+6968
+- 1438
+;
+
+3;
+
+7.14;
+
+size (string);
+
+[2,r,[1   ,2	,3],[7/2]];
+
+[];
+
+(2+3);
+
+[3] :: [2,1];
+
+5.27 * 4 - 3 / 24;
+
+ref var;
+! varb;
+hd(alist);
+tl(blist);
+
+( 3 + f );
+
+ if (a < b) then a else b;
+ while (!a < b) do a := !a + 1;
+
+gcd(a,b);
+subtract(a , b);
+
+3+4;
+17-10;
+10+7-2;
+
+fun factorial (n : int) =  if n < 1 then 1
+    else factorial (n-1) * n;
