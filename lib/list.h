@@ -13,6 +13,8 @@ typedef list_node* ListNode;
 
 int sizeof_listnode = sizeof(list_node);
 
+//New list node function is in the c file only to prevent external use.
+
 typedef struct list {
   int length;
   ListNode head;
@@ -23,7 +25,8 @@ typedef list* List;
 int sizeof_list = sizeof(list);
 
 List new_list();
-ListNode new_listnode(Void data, ListNode next);
+
+
 void list_destroy(List list);
  
 /*

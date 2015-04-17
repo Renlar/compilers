@@ -60,3 +60,23 @@ bool downcast(Type lhs, Type rhs);
 
 //Private
 TypeList compatlist(Type type);
+
+
+Type get_type(str name) {
+    bool eq(Type type, str name) {
+        return !strcmp(type->name, name);
+    }
+    return (Type) list_find(typelist, eq, name);
+}
+
+Type add_type(Type type) {
+    Type found = list_find(typelist, type_equal, type);
+    if(!found) {
+        list_append(typelist, type);
+    }
+    return found;
+}
+
+void remove_type(Type type) {
+    
+}

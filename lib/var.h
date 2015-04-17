@@ -10,7 +10,7 @@ typedef struct var {
 } var;
 typedef var* Var;
 
-int sizeof_var = sizeof(struct var);
+const int sizeof_var = sizeof(struct var);
 
 Var new_var(str name, Type type, bool isFunction) {
     Var var = malloc(sizeof_var);

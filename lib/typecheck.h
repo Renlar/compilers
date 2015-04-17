@@ -22,27 +22,23 @@ int get_scope_depth();
 /*
  * Push a new scope onto the stack.
  */
-void scope_push(str name);
+void push_scope(str name);
 
 /*
  * Pop the current scope off the stack.
  */
-void scope_pop();
+void pop_scope();
 
-/*
- * Get the name of the current scope
- */
-str scope_name();
 
 /*
  * Add a variable to the current scope.
  */
-void scope_add_var(str type, str var);
+void add_var(str type, str var);
 
 /*
  * Add a variable by 
  */
-void scope_add_var(Type type, str var);
+void add_var(Type type, str var);
 
 /*
  * Get the the var by name if it is in scope.
@@ -51,33 +47,21 @@ void scope_add_var(Type type, str var);
  */
 Var get_var(str symbol);
 
-/*
- * Get the var by the given name if it exists in the given scope
- * @scope the scope to search for the desired varialbe
- * @symbol the name of the variable we are looking for.
- * @return NULL if no var found with the given sumbol.
- */
-Var scope_get_var(str symbol, Scope scope);
 
 /*
  * Get the Type 
  * @symbol the name of the type to search for.
  * @return the Type if it exists, NULL otherwise.
  */
-Type scope_type_get(str symbol);
+Type get_scope_type(str symbol);
 
-/*
- * Add the given type to the current scope.
- * @type the type to add.
- */
-void scope_add_type(Type type);
 
 /*
  * Add the given type by name to the scope if it exists in the global type list.
  * Does nothing if the type does not exist in the global list.
  * @type the name of the type to search for.  
  */
-void scope_add_type(str type);
+void add_scope_type(str type);
 
 
 /*
@@ -95,5 +79,27 @@ Type contains_type(str type);
 
 //Private
 TypeList compatlist(Type type);
+
+
+/*
+ * Finds the type with the given name and returns it.
+ * @name the name to search for in the type list.
+ * @return the type with a name matching the provided name.
+ */
+Type get_type(str name);
+
+//Private
+/*
+ * Add the provided type to the type list returns the type as a pointer if it
+ * already exists.  Warning, creating types with new already does this.
+ */
+Type add_type(Type type);
+
+/*
+ * Removes the given type from existance.  Warning if inproperly used will
+ * create hanging pointers.  Generaly best to only use this function to clean up
+ * at the end.
+ */
+void remove_type(Type type);
 
 #endif//COMP_TYPECHECK

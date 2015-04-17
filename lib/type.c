@@ -1,6 +1,16 @@
 #include "type.h"
 #include "list.h"
 
+
+///////Private///////
+/*
+ * Generates the an unused anonomous type name and returns it as a str.
+ * @return a new anonomous type name.
+ */
+str new_atype_name();
+///////End Private///////
+
+
 Type new_type(str name) {
     Type type = malloc(sizeof_type);
     type->name = name;
@@ -34,14 +44,6 @@ bool type_equal(Type t1, Type t2) {
     }
 }
 
-Type get_type(str name) {
-    bool eq(Type type, str name) {
-        return !strcmp(type->name, name);
-    }
-    return (Type) list_find(typelist, eq, name);
-}
-
-
 str new_atype_name() {
     static unsigned int atype_count = 0;
     unsigned int c = atype_count;
@@ -62,13 +64,3 @@ str new_atype_name() {
     atype_count++;
     return atype_name;
 }
-
-Type add_type(Type type) {
-    Type found = list_find(typelist, type_equal, type);
-    if(!found) {
-        list_append(typelist, type);
-    }
-    return found;
-}
-
-Type 
