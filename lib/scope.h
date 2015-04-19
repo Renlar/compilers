@@ -8,7 +8,6 @@ typedef struct scope {
     struct scope parent;
     str name;
     List vars;
-    List types;
 } scope;
 
 typedef scope* Scope;
@@ -20,7 +19,7 @@ const int sizeof_scope = sizeof(scope);
  * @arg parent the scope to set as the parent of the new scope.  Can be null.
  * @return the newly created scope.
  */
-Scope new_scope(str name, Scope parent);
+Scope scope_new(str name, Scope parent);
 
 /*
  * @arg scope the scope to get the parent of.
@@ -36,24 +35,45 @@ str scope_name(Scope scope);
 
 /*
  * @arg scope the scope to get the varlist for.
- * @return the list of variables which were defined in @scope.
+ * @return the list of variables which are defined in @scope, ignores parents.
  */
-//List scope_varlist(Scope scope);
+List scope_vars(Scope scope);
 
 /*
- * Get the var by the given name if it exists in the given scope
- * @arg scope the Scope to search for the desired varialbe
- * @arg symbol the name of the variable we are looking for.
+ * Get the var if it exists in the passed in scope.  Does not search parent
+ * scopes.
+ * @arg scope the scope to search for a variable with @symbol
+ * @arg symbol the variable name to search for in @scope
+ * @return the varialbe if it is found, NULL otherwise.
+ */
+Var scope_get_var(Scope scope, str symbol);
+
+/*
+ * Get the var by the given name if it exists in the given scope or any parent
+ * scope.
+ * @arg scope the Scope to start searching for the desired varialbe
+ * @arg symbol the name of the variable to search for.
  * @return NULL if no var found with the given sumbol.
  */
 Var scope_find_var(Scope scope, str symbol);
 
 /*
- * @arg scope the Scope to search for a variable with @symbol.
- * @arg symbol the name of the variable to search for.
+ * Get the var if it exists in the passed in scope.  Does not search parent
+ * scopes.
+ * @arg scope the scope to search for a variable with @symbol
+ * @arg symbol the variable name to search for in @scope
  * @return true if @symbol exists in @scope
  */
 bool scope_has_var(Scope scope, str symbol);
+
+/*
+ * Get the var by the given name if it exists in the given scope or any parent
+ * scope.
+ * @arg scope the Scope to start searching for the desired varialbe
+ * @arg symbol the name of the variable to search for.
+ * @return true if @symbol is currently in scope.
+ */
+bool scope_var_exists(Scope scope, str symbol);
 
 /*
  * @arg scope the Scope to add the variable to.
@@ -67,15 +87,6 @@ void scope_add_var(Scope scope, Var var);
  * @arg parent the Scope to set as teh parent of @scope
  */
 void scope_set_parent(Scope scope, Scope parent);
-
-/*
- * Adds a type to the current scope.  This is only necessary if the type is not
- * used in a parent scope.  Warning: Types will be deleted along with vars when
- * the scope is deleted do not store them persistantly elsewhere.
- * @arg scope the scope to add @type to.
- * @arg type the type to add to @scope.
- */
-void scope_add_type(Scope scope, Type type);
 
 /*
  * Get the depth of the current scope.

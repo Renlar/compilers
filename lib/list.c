@@ -183,6 +183,31 @@ void list_for_each_node(List list, void (*op)(ListNode node)) {
 }
 
 
+/*List list_for_each_pair(List list, List list, Anom (*op)(Anom)) {
+  Anom fun(ListNode node1, ListNode node2) {
+    return (*op)(node1->data, node2->data);
+  }
+  return list_for_each_pair_node(list, fun);
+}
+
+
+void list_for_each_pair_node(List list1, List list2, void (*op)(ListNode node)) {
+  if (list1 != NULL) {
+    ListNode node1 = list1->head, node2 = list2->head;
+    
+    while (node != NULL) {
+      (*op)(node1, node2);
+      if (node1 != NULL) {
+        node1 = node1->next;
+      }
+      if (node2 != NULL) {
+        node2 = node2->next;
+      }
+    }
+  }
+}*/
+
+
 Anom list_head(List list) {
   if (list != NULL && list->head != NULL) {
     return list->head->data;
@@ -298,4 +323,4 @@ ListNode list_get_node(List list, int pos) {
 
 /*str list_to_string(List list, str (*element_to_str)(Anom)) {
   
-}
+}*/

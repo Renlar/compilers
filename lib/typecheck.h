@@ -4,102 +4,66 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "type.h"
-#include "list.h"
-#include "ngraph.h"
-#include "scope.h"
-#include "var.h"
-#include "ngraph.h"
 #include "string.h"
+#include "list.h"
+#include "type.h"
+#include "var.h"
+#include "scope.h"
 
-
+Scope current = NULL;
 
 /*
  * Get the current scope depth.
  */
-int get_scope_depth();
+int get_scope_depth() {
+  return scope_depth(current);
+}
 
 /*
  * Push a new scope onto the stack.
  */
-void push_scope(str name);
+void push_scope(str name) {
+  if (current == NULL) {
+    printf("SCOPE_WARNING: push_scope: Current scope is null. Pusing %s as global scope.", name);
+  }
+  current = scope_new(name, current);
+}
 
 /*
  * Pop the current scope off the stack.
  */
-void pop_scope();
-
+void pop_scope() {
+  if (current == NULL) {
+    printf("SCOPE_ERROR: pop_scope: FALTAL current scope is null.  Did you forget to push a global scope first?");
+    return;
+  }
+  if (scope_parent(current) == NULL) {
+    printf("SCOPE_ERROR: pop_scope: called when only global scope remains. Cowardly, Refusing to pop global scope.");
+    return;
+  }
+  Scope prev = current;
+  current = scope_parent(current);
+  scope_destroy(prev);
+}
 
 /*
- * Add a variable to the current scope.
+ * Add a variable to the current scope
  */
-void add_var(str type, str var);
-
-/*
- * Add a variable by 
- */
-void add_var(Type type, str var);
+void add_var(Var var) {
+  if (current == NULL) {
+    printf("SCOPE_ERROR: add_var: FALTAL current scope is null.  Did you forget to push a global scope first?");
+    return;
+  }
+  scope_add_var(current, var);
+}
 
 /*
  * Get the the var by name if it is in scope.
  * @symbol the name of the varialble to search for.
  * @return NULL if no var found with given name in the current or parent scopes.
  */
-Var get_var(str symbol);
-
-
-/*
- * Get the Type 
- * @symbol the name of the type to search for.
- * @return the Type if it exists, NULL otherwise.
- */
-Type get_scope_type(str symbol);
-
-
-/*
- * Add the given type by name to the scope if it exists in the global type list.
- * Does nothing if the type does not exist in the global list.
- * @type the name of the type to search for.  
- */
-void add_scope_type(str type);
-
-
-/*
- * Add a new type to the global list.  Ignored if the type already exists.
- */
-void add_type(Type type);
-
-/*
- * 
- */
-Type contains_type(Type type);
-Type contains_type(str type);
-
-
-
-//Private
-TypeList compatlist(Type type);
-
-
-/*
- * Finds the type with the given name and returns it.
- * @name the name to search for in the type list.
- * @return the type with a name matching the provided name.
- */
-Type get_type(str name);
-
-//Private
-/*
- * Add the provided type to the type list returns the type as a pointer if it
- * already exists.  Warning, creating types with new already does this.
- */
-Type add_type(Type type);
-
-/*
- * Removes the given type from existance.  Warning if inproperly used will
- * create hanging pointers.  Generaly best to only use this function to clean up
- * at the end.
- */
-void remove_type(Type type);
+Var get_var(str symbol) {
+  return scope_find_var(current, symbol);
+}
 
 #endif//COMP_TYPECHECK

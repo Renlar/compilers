@@ -3,33 +3,32 @@
 
 #include <stdbool.h>
 
+#include "string.h"
+#include "type.h"
+
 typedef struct var {
-    bool isFunction;
-    str name;
-    Type type;
+  bool isFunction;
+  str name;
+  Type type;
 } var;
 typedef var* Var;
 
 const int sizeof_var = sizeof(struct var);
 
-Var new_var(str name, Type type, bool isFunction) {
-    Var var = malloc(sizeof_var);
-    var->name = name;
-    var->type = type;
-    var->isFunction = isFunction;
-    return var;
-}
+Var new_var(str name, Type type, bool isFunction);
 
-str var_name(Var var) {
-    return var->name;
-}
+str var_name(Var var);
 
-Type var_type(Var var) {
-    return var->type;
-}
+str var_symbol(Var var);
 
-bool var_isFunc(Var var){
-    return var->isFunction;
-}
+Type var_type(Var var);
+
+bool var_is_func(Var var);
+
+bool var_eq(Var a, Var b);
+
+bool var_name_eq(Var a, Var b);
+
+bool var_type_eq(Var a, Var b);
 
 #endif//COMP_VAR

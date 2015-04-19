@@ -16,7 +16,21 @@ typedef type* Type;
 
 const int sizeof_type = sizeof(struct type);
 
-List typelist;
+TYPE type_base(Type type) {
+  if (type == NULL) {
+    printf("TYPE_ERROR: type_base: received NULL argument, type.");
+    return ERROR;
+  }
+  return type->base;
+}
+
+List type_sub(Type type) {
+  if (type == NULL) {
+    printf("TYPE_ERROR: type_sub: received NULL argument, type.")
+    return NULL;
+  }
+  return type->sub;
+}
 
 /*
  * @arg name the name for the new type.  

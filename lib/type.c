@@ -14,11 +14,11 @@ Type new_type(TYPE base, List sub) {
   type->base = base;
   type->sub = sub;
   if ((base != LIST || base != TUPLE) && sub != NULL) {
-    printf("TYPE_ERROR: got %s with subtypes, expected LIST or TUPLE.", btype_to_str(base));
+    printf("TYPE_ERROR: found %s with subtypes, expected LIST or TUPLE.\n", btype_to_str(base));
   }
   if (base == LIST) {
     if (!valid_list(type)) {
-      printf("TYPE_SUBTYPE_ERROR: root type: LIST.  Expected single subtype, got multiple");
+      printf("TYPE_SUBTYPE_ERROR: root type: LIST.  Expected single subtype, found multiple.\n");
     }
   }
   Type added = add_type(type);
@@ -28,6 +28,7 @@ Type new_type(TYPE base, List sub) {
   }
   return type;
 }
+
 
 void type_destroy(Type t) {
   if (t != NULL) {
@@ -39,34 +40,43 @@ void type_destroy(Type t) {
   }
 }
 
+//TODO: finish type_upcast and type_downcast.
 Type type_upcast(Type t1, Type t2) {
+  if (t1 == NULL || t2 == NULL) {
+    printf("TYPE_CAST_ERROR: type_upcast: received NULL type.\n");
+    return NULL;
+  }
    Type c = new_type()
-   if (upcast(t1->base, t2->base)) {
+   if (upcast(type_base(t1), type_base(t2))) {
      
    }
 }
 
+
 Type type_downcast(Type t1, Type t2) {
   if (t1 == NULL || t2 == NULL) {
-    printf("TYPE_CAST_ERROR: downcast received NULL type.");
+    printf("TYPE_CAST_ERROR: type_downcast: received NULL type.\n");
     return NULL;
   }
   if (t1->sub && t2->sub) {
-    List sub = list_for_each_pair(t1->sub, t2->sub, type_downcast);
+    List sub = list_for_each_pair(type_sub(sub), type_sub(t2), type_downcast);
   } else {
-    printf("TYPE_CAST_WARNING: complex types are incompatable due to missing subtypes");
+    printf("TYPE_CAST_WARNING: type_downcast: complex types are incompatable due to missing subtypes.\n");
     return NULL;
   }
   return new_type(downcast(t1->base, t2->base), sub);
 }
 
+
 bool can_upcast(TYPE t1, TYPE t2) {
   return (bool) upcast(TYPE t1, TYPE t2);
 }
 
+
 bool can_downcast(TYPE t1, TYPE t2) {
   return (bool) downcast(TYPE t1, TYPE t2);
 }
+
 
 TYPE upcast(TYPE t1, TYPE t2) {
   if (!t1 || !t2) {
@@ -78,6 +88,7 @@ TYPE upcast(TYPE t1, TYPE t2) {
   }
   return t1;
 }
+
 
 TYPE downcast(TYPE t1, TYPE t2) {
   if (!t1 || !t2) {
@@ -92,24 +103,29 @@ TYPE downcast(TYPE t1, TYPE t2) {
   return ERROR;
 }
 
+
 str btype_to_str(TYPE t) {
+  str r;
   if (t == ERROR) {
-    return "ERROR";
+    r = str_new("ERROR");
   } else if (t == BOOL) {
-    return "BOOL";
+    r = str_new("BOOL");
   } else if (t == INT) {
-    return "INT";
+    r = str_new("INT");
   } else if (t == REAL) {
-    return "REAL";
+    r = str_new("REAL");
   } else if (t == LIST) {
-    return "LIST";
+    r = str_new("LIST");
   } else if (t == TUPLE) {
-    return "TUPLE";
+    r = str_new("TUPLE");
+  } else {
+    r = str_new("UNKNOWN");
   }
-  return "UNKNOWN";
+  return r;
 }
 
-//TODO: check this method.
+
+//TODO: check this method for errors.
 bool valid_list(Type list) {
   if (list == NULL) {
     return false;
