@@ -38,7 +38,7 @@ str scope_name(Scope scope);
  * @arg scope the scope to get the varlist for.
  * @return the list of variables which were defined in @scope.
  */
-List scope_varlist(Scope scope);
+//List scope_varlist(Scope scope);
 
 /*
  * Get the var by the given name if it exists in the given scope
@@ -69,10 +69,13 @@ void scope_add_var(Scope scope, Var var);
 void scope_set_parent(Scope scope, Scope parent);
 
 /*
- * @arg 
+ * Adds a type to the current scope.  This is only necessary if the type is not
+ * used in a parent scope.  Warning: Types will be deleted along with vars when
+ * the scope is deleted do not store them persistantly elsewhere.
+ * @arg scope the scope to add @type to.
+ * @arg type the type to add to @scope.
  */
 void scope_add_type(Scope scope, Type type);
-
 
 /*
  * Get the depth of the current scope.
@@ -80,7 +83,6 @@ void scope_add_type(Scope scope, Type type);
  * @return 0 if the scope is the global scope or -1 if @scope is NULL.
  */
 int scope_depth(Scope scope);
-
 
 
 #endif//COMP_SCOPE

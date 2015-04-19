@@ -1,6 +1,6 @@
 ##Compilers Semester Project
 
-###Coding Choices
+###Coding Guidelines
 ####Functions
 1. Fuctions which will be used outside of the current file should be declared in a header file.
 2. No functions should be implemented in header files except accessors.
@@ -12,7 +12,7 @@
   * A short description of each return values and argument.
   * Documentation layout:
     * *Description of the method*
-    * @arg *<argument name>* *Description of the argument*
+    * @arg *\<argument name\>* *Description of the argument*
     * @return *Description of return value*
 7. Functions should be less than 20 lines in length to prevent bugs and reduce debugging time.
 8. Functions should return values they generate through the standard c return statement.

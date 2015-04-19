@@ -6,9 +6,11 @@
 #include "string.h"
 #include "list.h"
 
+enum TYPE {ERROR = 0, BOOL = 1, INT = 10, REAL = 11, LIST = 20, TUPLE = 21}
+
 typedef struct type {
-    str name;
-    List sub;
+  TYPE base;
+  List sub;
 } type;
 typedef type* Type;
 
@@ -19,20 +21,19 @@ List typelist;
 /*
  * @arg name the name for the new type.  
  */
-Type new_type(str name);
+Type type_new(TYPE t, List sub);
 
 /*
- * @return a new anonomous type.
+ * Free all memeory associated with a type.
  */
-Type new_atype();
+void type_destroy(Type t);
 
 /*
- * Performs a shallow comparison of two types.  First compares pointers then
- * names.  Does not consider structure unless the types are anonomous.
- * @return true if types are equal false otherwise.
+ * Performs a ml centered type comparison.  Compatable types may be the same or
+ * one may be cast to the other.
+ * @return true if types are compatable false otherwise.
  */
-bool type_equal(Type t1, Type t2);
+bool type_compat(Type t1, Type t2);
 
-void 
 
 #endif//COMP_TYPE

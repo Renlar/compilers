@@ -2,6 +2,7 @@
 #define COMP_STRING
 
 #include <string.h>
+#include <stdlib.h>
 
 typedef char* str;
 
@@ -12,9 +13,9 @@ typedef char* str;
  * @return a pointer to the malloced memory containing s.
  */
 str str_new(str s) {
-    str c = malloc(sizeof(char) * (strlen(s) + 1));
-    strcopy(s, c);
-    return c;
+  str c = malloc(sizeof(char) * (strlen(s) + 1));
+  strcpy(s, c);
+  return c;
 }
 
 
