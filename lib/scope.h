@@ -5,7 +5,7 @@
 #include "type.h"
 
 typedef struct scope {
-    struct scope parent;
+    struct scope *parent;
     str name;
     List vars;
 } scope;

@@ -42,7 +42,7 @@ Var scope_get_var(Scope scope, str symbol) {
       return (bool) !strcmp(var_name(var), symbol);
     }
   }
-  return list_find(scope_vars(scope), eq, symbol);
+  return (Var)list_find(scope_vars(scope), eq, symbol);
 }
 
 Var scope_find_var(Scope scope, str symbol) {
@@ -55,11 +55,11 @@ Var scope_find_var(Scope scope, str symbol) {
 }
 
 bool scope_has_var(Scope scope, str symbol) {
-  return (bool) *scope_get_var(scope, symbol);
+  return scope_get_var(scope, symbol) != NULL;
 }
 
 bool scope_var_exists(Scope scope, str symbol) {
-  return (bool) *scope_find_var(scope, symbol);
+  return scope_find_var(scope, symbol) != NULL;
 }
 
 void scope_add_var(Scope scope, Var var) {

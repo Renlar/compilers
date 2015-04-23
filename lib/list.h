@@ -123,7 +123,9 @@ bool list_equal(List l1, List l2, bool (*eq)(Anom, Anom));
  */
 void list_for_each(List list, void (*op)(Anom));
 
+List list_for_each_pair(List list1, List list2, Anom (*op)(Anom, Anom));
+
 //str list_to_string(List list, str (*element_to_str)(Anom));
 
 
-#endif//COMPLIST
+#endif//COMPLISTs

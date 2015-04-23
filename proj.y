@@ -8,6 +8,7 @@
 %{
  /* put your c declarations here */
 #define YYDEBUG 1
+#include "typecheck.h"
 %}
 
 %%
@@ -22,7 +23,7 @@ add : add add_op add | mult
 mult : mult mult_op mult | paren
 paren : LPAR repexp RPAR | list
 list : LBRK elements RBRK | LBRK RBRK | NIL | val
-val : ID | INT | REAL | NEG INT | NEG REAL | BOOL | fun_call
+val : ID {get_var($$)} | INT | REAL | NEG INT | NEG REAL | BOOL | fun_call
 fun_call : id tuple | id exp | ID tuple | ID exp 
 id : HD | DREF | NOT | TL | REF
 tuple : LPAR elements RPAR | LPAR RPAR

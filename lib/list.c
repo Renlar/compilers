@@ -8,7 +8,7 @@ ListNode listnode_new(Anom dat, ListNode prev, ListNode next, List list);
  * Links both node1 and node2 to eath other.  
  * Links node1's next to node2 and node2's previous to node1.  
  */
-void link_nodes(LinkNode node1, LinkNode node2);
+void link_nodes(ListNode node1, ListNode node2);
 
 /*
  * Links the previous node to the next node and frees teh current node.
@@ -57,7 +57,7 @@ ListNode listnode_new(Anom data, ListNode prev, ListNode next, List list) {
 }
 
 
-void link_nodes(LinkNode node1, LinkNode node2){
+void link_nodes(ListNode node1, ListNode node2){
   if(node1 != NULL){
     node1->next = node2;
   }
@@ -144,7 +144,7 @@ void list_remove(List list, Anom element) {
     bool eq(Anom e1, Anom e2) {
       return e1 == e2;
     }
-    Node node = list_find_node(list, eq, element);
+    ListNode node = list_find_node(list, eq, element);
     if (node != NULL) {
       listnode_destroy(node);
       list->length--;
@@ -183,20 +183,21 @@ void list_for_each_node(List list, void (*op)(ListNode node)) {
 }
 
 
-/*List list_for_each_pair(List list, List list, Anom (*op)(Anom)) {
+List list_for_each_pair(List list1, List list2, Anom (*op)(Anom, Anom)) {
   Anom fun(ListNode node1, ListNode node2) {
     return (*op)(node1->data, node2->data);
   }
-  return list_for_each_pair_node(list, fun);
+  return list_for_each_pair_node(list1, list2, fun);
 }
 
 
-void list_for_each_pair_node(List list1, List list2, void (*op)(ListNode node)) {
-  if (list1 != NULL) {
+List list_for_each_pair_node(List list1, List list2, Anom (*op)(ListNode node)) {
+  List ret = new_list();
+  if (list1 != NULL || list2 != NULL) {
     ListNode node1 = list1->head, node2 = list2->head;
     
-    while (node != NULL) {
-      (*op)(node1, node2);
+    while (node1 != NULL || node2 != NULL) {
+      list_append(ret, (*op)(node1, node2));
       if (node1 != NULL) {
         node1 = node1->next;
       }
@@ -205,7 +206,8 @@ void list_for_each_pair_node(List list1, List list2, void (*op)(ListNode node)) 
       }
     }
   }
-}*/
+  return ret;
+}
 
 
 Anom list_head(List list) {
@@ -218,7 +220,7 @@ Anom list_head(List list) {
 
 void list_behead(List list) {
   if (list != NULL && list->head != NULL) {
-    listnode_destroy(node);
+    listnode_destroy(list->head);
     list->length--;
   }
 }
@@ -278,7 +280,7 @@ ListNode list_find_node(List list, bool (*eq)(Anom, Anom), Anom element) {
       cur = cur->next;
     }
   }
-  return cur;
+  return NULL;
 }
 
 
@@ -316,7 +318,7 @@ ListNode list_get_node(List list, int pos) {
     if (cur == NULL) {
       break;
     }
-    cur = cur->next
+    cur = cur->next;
   }
   return cur;
 }
