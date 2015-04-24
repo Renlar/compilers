@@ -1,5 +1,5 @@
-#ifndef COMP_TYPE_BASE
-#define COMP_TYPE_BASE
+#ifndef COMP_TYPE
+#define COMP_TYPE
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -8,12 +8,13 @@
 #include "list.h"
 
 typedef enum {
-  ERROR = 0, 
-  BOOL = 1, 
-  INT = 10, 
-  REAL = 11, 
-  LIST = 20, 
-  TUPLE = 21
+  T_ERROR = 0,
+  T_REF = 1,
+  T_BOOL = 10, 
+  T_INT = 20, 
+  T_REAL = 21, 
+  T_LIST = 30, 
+  T_TUPLE = 31
 } TYPE_BASE;
 
 typedef struct type {
@@ -24,7 +25,7 @@ typedef struct type {
 typedef type* Type;
 
 
-const int sizeof_type = sizeof(struct type);
+const int sizeof_type;
 
 
 Type type_new(TYPE_BASE base, List sub);
@@ -37,6 +38,9 @@ TYPE_BASE type_base(Type type);
 
 
 List type_sub(Type type);
+
+
+bool type_eq(Type t1, Type t2);
 
 
 Type type_upcast(Type t1, Type t2);
@@ -63,7 +67,7 @@ TYPE_BASE downcast(TYPE_BASE t1, TYPE_BASE t2);
 str btype_to_str(TYPE_BASE t);
 
 
-bool valid_list(Type type);
+bool type_list_valid(Type type);
 
 
-#endif//COMP_TYPE_BASE
+#endif//COMP_TYPE

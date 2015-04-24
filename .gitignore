@@ -3,3 +3,7 @@
 /build/
 *.o
 *.gch
+proj
+proj.tab.c
+proj.output
+lex.yy.c

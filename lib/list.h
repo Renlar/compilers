@@ -15,7 +15,7 @@ typedef struct list_node {
 } list_node;
 typedef list_node* ListNode;
 
-const int sizeof_listnode = sizeof(list_node);
+const int sizeof_listnode;
 
 typedef struct list {
   int length;
@@ -24,7 +24,7 @@ typedef struct list {
 } list;
 typedef list* List;
 
-const int sizeof_list = sizeof(list);
+const int sizeof_list;
 
 List list_new();
 

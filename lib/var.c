@@ -2,12 +2,19 @@
 
 #include <stdlib.h>
 
-Var new_var(str name, Type type, bool isFunction) {
+const int sizeof_var = sizeof(struct var);
+
+Var var_new(str name, Type type) {
   Var var = malloc(sizeof_var);
-  var->name = name;
+  var->name = str_new(name);
   var->type = type;
-  var->isFunction = isFunction;
   return var;
+}
+
+void var_destroy(Var var) {
+  type_destroy(var_type(var));
+  str_destroy(var_name(var));
+  free(var);
 }
 
 str var_name(Var var) {
@@ -34,18 +41,8 @@ Type var_type(Var var) {
   return var->type;
 }
 
-bool var_is_func(Var var){
-  if (var == NULL) {
-    printf("VAR_ERROR: var_is_func: received NULL argument, var.");
-    return NULL;
-  }
-  return var->isFunction;
-}
-
 bool var_eq(Var a, Var b) {
-  bool name = var_name_eq(a, b);
-  bool type = var_type_eq(a, b);
-  return name && type;
+  return var_type_eq(a, b) && var_name_eq(a, b);
 }
 
 bool var_name_eq(Var a, Var b) {

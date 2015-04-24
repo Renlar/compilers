@@ -2,7 +2,7 @@
 #define COMP_STRING
 
 #include <string.h>
-#include <stdlib.h>
+#include <stdbool.h>
 
 typedef char* str;
 
@@ -12,11 +12,11 @@ typedef char* str;
  * @arg s a pointer to the string to malloc space for.
  * @return a pointer to the malloced memory containing s.
  */
-str str_new(str s) {
-  str c = malloc(sizeof(char) * (strlen(s) + 1));
-  strcpy(s, c);
-  return c;
-}
+str str_new(str s);
+
+void str_destroy(str s);
+
+bool str_empty(str s);
 
 
 #endif//COMP_STRING

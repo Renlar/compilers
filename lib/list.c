@@ -3,6 +3,11 @@
 #include "list.h"
  
 ///////Private///////
+const int sizeof_listnode = sizeof(list_node);
+
+const int sizeof_list = sizeof(list);
+
+
 ListNode listnode_new(Anom dat, ListNode prev, ListNode next, List list);
 /*
  * Links both node1 and node2 to eath other.  
@@ -27,6 +32,9 @@ ListNode list_get_node(List list, int pos);
  */
 void list_for_each_node(List list, void (*op)(ListNode node));
 
+ListNode list_find_node(List list, bool (*eq)(Anom, Anom), Anom element);
+
+List list_for_each_pair_node(List list1, List list2, Anom (*op)(ListNode, ListNode));
 ///////End Private///////
 
 List list_new() {
@@ -69,7 +77,6 @@ void link_nodes(ListNode node1, ListNode node2){
 
 void list_destroy(List list) {
   if (list != NULL) {
-    ListNode current;
     void op(ListNode node) {
       free(node);
     }
@@ -96,7 +103,7 @@ void listnode_destroy(ListNode node) {
 
 void list_prepend(List list, Anom element) {
   if (list != NULL) {
-    ListNode node = listnode_new(element, NULL, list->head, list);
+    listnode_new(element, NULL, list->head, list);
     list->length++;
   }
 }
@@ -123,7 +130,7 @@ void list_insert(List list, Anom element, int pos) {
 
 void list_append(List list, Anom element) {
   if (list != NULL) {
-    ListNode node = listnode_new(element, list->tail, NULL, list);
+    listnode_new(element, list->tail, NULL, list);
     list->length++;
   }
 }
@@ -134,7 +141,7 @@ void list_append_list(List list, List append) {
     void op(ListNode node) {
       list_append(list, node->data);
     }
-    list_for_each(append, op);
+    list_for_each(append, (void (*)(Anom))op);
   }
 }
 
@@ -174,10 +181,11 @@ void list_for_each(List list, void (*op)(Anom)) {
 
 void list_for_each_node(List list, void (*op)(ListNode node)) {
   if (list != NULL) {
-    ListNode node = list->head;
+    ListNode node = list->head, next;
     while (node != NULL) {
+      next = node->next;
       (*op)(node);
-      node = node->next;
+      node = next;
     }
   }
 }
@@ -191,19 +199,22 @@ List list_for_each_pair(List list1, List list2, Anom (*op)(Anom, Anom)) {
 }
 
 
-List list_for_each_pair_node(List list1, List list2, Anom (*op)(ListNode node)) {
-  List ret = new_list();
+List list_for_each_pair_node(List list1, List list2, Anom (*op)(ListNode, ListNode)) {
+  List ret = list_new();
   if (list1 != NULL || list2 != NULL) {
-    ListNode node1 = list1->head, node2 = list2->head;
+    ListNode node1 = list1->head, node2 = list2->head, next1 = NULL, next2 = NULL;
     
     while (node1 != NULL || node2 != NULL) {
-      list_append(ret, (*op)(node1, node2));
       if (node1 != NULL) {
-        node1 = node1->next;
+        next1 = node1->next;
       }
       if (node2 != NULL) {
-        node2 = node2->next;
+        next2 = node2->next;
+        
       }
+      list_append(ret, (*op)(node1, node2));
+      node1 = next1;
+      node2 = next2;
     }
   }
   return ret;
