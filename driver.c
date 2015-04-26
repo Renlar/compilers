@@ -12,7 +12,6 @@ extern void yyerror(const char* msg)
 {
   char *p;
   fprintf(stderr, "Line %d : %s : %s \n",yylineno,msg, yytext);
-  exit(1);
 }
 
 

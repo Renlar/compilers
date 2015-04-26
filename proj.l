@@ -1,4 +1,5 @@
 %pointer
+
 %option noyywrap
 %option yylineno
 
@@ -66,5 +67,3 @@
 
 [ \t\n\r]+   {}
 \(\*(\*[^\)]|\)|[^\*])*\*\) {} //ignore comments.
-
-%%

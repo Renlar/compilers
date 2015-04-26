@@ -20,12 +20,12 @@
 
 ####Arguemnts
 1. Avoid passing function pointers as arguments, unless it greately increases the usability or readability of the code.
-2. The number of arguments to functions should be 4 or fewer, if greator than 7 the design needs to be rethought.
+2. The number of arguments to functions should be 4 or fewer, if greater than 7 the design needs to be rethought.
 3. Arguments should not be used to return results which are generated in the function.
 4. Any arguements used to return results directly through setting a pointer or indirectly through modification of the input values should come first in the argument list.
 
 ####Pointers
-1. Double pointers and greator are avoided as much as possible.  If they must be used they should be hidden behind mutators and accessors.
+1. Double pointers and greater are avoided as much as possible.  If they must be used they should be hidden behind mutators and accessors.
 2. Pointers are treated as references whenever possible.
 3. Pointer arithmetic should be avoided.  If it is used it should be peformed in a "library" file, protected by mutators and accessors.
 

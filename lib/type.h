@@ -7,15 +7,10 @@
 #include "string.h"
 #include "list.h"
 
-typedef enum {
-  T_ERROR = 0,
-  T_REF = 1,
-  T_BOOL = 10, 
-  T_INT = 20, 
-  T_REAL = 21, 
-  T_LIST = 30, 
-  T_TUPLE = 31
-} TYPE_BASE;
+//The following two lines must be kept in sync otherwise messages will be 
+//incorrect and segfaults could result.
+typedef enum TYPE_BASE {T_ERROR, T_REF, T_BOOL, T_INT, T_REAL, T_LIST, T_TUPLE} TYPE_BASE;
+static const str TYPE_BASE_STR[] = {"ERROR", "BOOL", "INT", "REAL", "LIST", "TUPLE", "UNKNOWN"};
 
 typedef struct type {
   TYPE_BASE base;
@@ -40,13 +35,13 @@ TYPE_BASE type_base(Type type);
 List type_sub(Type type);
 
 
-bool type_eq(Type t1, Type t2);
+bool type_eq(const Type t1, const Type t2);
 
 
-Type type_upcast(Type t1, Type t2);
+Type type_upcast(const Type t1, const Type t2);
 
 
-bool type_assign_cast(Type lhs, Type rhs);
+bool type_assign_cast(const Type lhs, const Type rhs);
 
 
 bool can_assign_cast(TYPE_BASE lhs, TYPE_BASE rhs);
@@ -64,10 +59,10 @@ TYPE_BASE upcast(TYPE_BASE t1, TYPE_BASE t2);
 TYPE_BASE downcast(TYPE_BASE t1, TYPE_BASE t2);
 
 
-str btype_to_str(TYPE_BASE t);
+const str btype_to_str(TYPE_BASE t);
 
 
-bool type_list_valid(Type type);
+bool type_list_valid(const Type type);
 
 
 #endif//COMP_TYPE

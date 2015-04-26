@@ -33,7 +33,7 @@ Type type_new(TYPE_BASE base, List sub) {
 void type_destroy(Type t) {
   if (t != NULL) {
     if (type_sub(t) != NULL) {
-    list_for_each(type_sub(t), (void (*)(void *))type_destroy);
+    list_for_each(type_sub(t), (void (*)(Anom))type_destroy);
     list_destroy(type_sub(t));
     }
     free(t);
@@ -154,24 +154,8 @@ TYPE_BASE downcast(TYPE_BASE t1, TYPE_BASE t2) {
 }
 
 
-str btype_to_str(TYPE_BASE t) {
-  str r;
-  if (t == T_ERROR) {
-    r = str_new("ERROR");
-  } else if (t == T_BOOL) {
-    r = str_new("BOOL");
-  } else if (t == T_INT) {
-    r = str_new("INT");
-  } else if (t == T_REAL) {
-    r = str_new("REAL");
-  } else if (t == T_LIST) {
-    r = str_new("LIST");
-  } else if (t == T_TUPLE) {
-    r = str_new("TUPLE");
-  } else {
-    r = str_new("UNKNOWN");
-  }
-  return r;
+const str btype_to_str(TYPE_BASE t) {
+  return TYPE_BASE_STR[t];
 }
 
 

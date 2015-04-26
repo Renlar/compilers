@@ -19,7 +19,7 @@ void var_destroy(Var var) {
 
 str var_name(Var var) {
   if (var == NULL) {
-    printf("VAR_ERROR: var_name: received NULL argument, var.");
+    printf("VAR_ERROR: var_name: received NULL argument, var.\n");
     return NULL;
   }
   return var->name;
@@ -27,7 +27,7 @@ str var_name(Var var) {
 
 str var_symbol(Var var) {
   if (var == NULL) {
-    printf("VAR_ERROR: var_symbol: received NULL argument, var.");
+    printf("VAR_ERROR: var_symbol: received NULL argument, var.\n");
     return NULL;
   }
   return var->name;
@@ -35,7 +35,7 @@ str var_symbol(Var var) {
 
 Type var_type(Var var) {
   if (var == NULL) {
-    printf("VAR_ERROR: var_type: received NULL argument, var.");
+    printf("VAR_ERROR: var_type: received NULL argument, var.\n");
     return NULL;
   }
   return var->type;

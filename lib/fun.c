@@ -21,7 +21,7 @@ void fun_destroy(Fun fun) {
 
 str fun_name(Fun fun) {
   if (fun == NULL) {
-    printf("FUN_ERROR: fun_name: received NULL argument, fun.");
+    printf("FUN_ERROR: fun_name: received NULL argument, fun.\n");
     return NULL;
   }
   return fun->name;
@@ -29,7 +29,7 @@ str fun_name(Fun fun) {
 
 str fun_symbol(Fun fun) {
   if (fun == NULL) {
-    printf("FUN_ERROR: fun_symbol: received NULL argument, fun.");
+    printf("FUN_ERROR: fun_symbol: received NULL argument, fun.\n");
     return NULL;
   }
   return fun->name;
@@ -37,7 +37,7 @@ str fun_symbol(Fun fun) {
 
 Type fun_ret_type(Fun fun) {
   if (fun == NULL) {
-    printf("FUN_ERROR: fun_type: received NULL argument, fun.");
+    printf("FUN_ERROR: fun_type: received NULL argument, fun.\n");
     return NULL;
   }
   return fun->ret;
@@ -45,7 +45,7 @@ Type fun_ret_type(Fun fun) {
 
 Type fun_arg_type(Fun fun) {
   if (fun == NULL) {
-    printf("FUN_ERROR: fun_type: received NULL argument, fun.");
+    printf("FUN_ERROR: fun_type: received NULL argument, fun.\n");
     return NULL;
   }
   return fun->arg;

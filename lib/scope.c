@@ -85,12 +85,6 @@ void scope_add_var(Scope scope, Var var) {
   }
 }
 
-
-
-
-
-
-
 List scope_funs(Scope scope) {
   if (scope != NULL) {
     return scope->funs;
@@ -141,11 +135,6 @@ void scope_add_fun(Scope scope, Fun fun) {
     printf("SCOPE_VAR_WARNING: scope_add_fun: received NULL argument, scope and/or fun.\n");
   }
 }
-
-
-
-
-
 
 int scope_depth(Scope scope) {
   int depth = -1;

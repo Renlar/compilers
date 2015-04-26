@@ -12,11 +12,11 @@ typedef char* str;
  * @arg s a pointer to the string to malloc space for.
  * @return a pointer to the malloced memory containing s.
  */
-str str_new(str s);
+str str_new(const str s);
 
 void str_destroy(str s);
 
-bool str_empty(str s);
+bool str_empty(const str s);
 
 
 #endif//COMP_STRING
