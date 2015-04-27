@@ -52,7 +52,7 @@ paren :
             {push_scope("Begin paren");} LPAR repexp RPAR {pop_scope(); $$ = $2;}
           | list      {$$ = $1;}
 list :
-            LBRK elements RBRK {$$ = typecheck_list($2, yylineno);}
+            LBRK exp elements RBRK {$$ = typecheck_list(typecheck_elements($2, $3, yylineno), yylineno);}
           | LBRK RBRK {$$ = typecheck_list(NULL, yylineno);}
           | NIL {$$ = typecheck_list(NULL, yylineno);}
           | val {$$ = $1;}
@@ -65,25 +65,26 @@ val :
           | BOOL      {$$ = typecheck_const(T_BOOL, yylineno);}
           | fun_call  {$$ = $1;}
 fun_call :
-            id tuple  {$$ = typecheck_fun_call($1, $2, yylineno);}
+            id val {$$ = typecheck_fun_call($1, $2, yylineno);}
+          | id LPAR repexp RPAR  {$$ = typecheck_fun_call($1, $3, yylineno);}
+          | id_d val {$$ = typecheck_fun_call($1, $2, yylineno);}
+          | id_d LPAR repexp RPAR {$$ = typecheck_fun_call($1, $3, yylineno);}
           | id_d tuple  {$$ = typecheck_fun_call($1, $2, yylineno);}
-          | id exp    {$$ = typecheck_fun_call($1, $2, yylineno);}
-          | id_d exp    {$$ = typecheck_fun_call($1, $2, yylineno);}
 id :
-            HD        {$$ = strdup(yytext);}
-          | DREF      {$$ = strdup(yytext);}
-          | NOT       {$$ = strdup(yytext);}
-          | TL        {$$ = strdup(yytext);}
-          | REF       {$$ = strdup(yytext);}
+            HD        {$$ = str_new(yytext);}
+          | DREF      {$$ = str_new(yytext);}
+          | NOT       {$$ = str_new(yytext);}
+          | TL        {$$ = str_new(yytext);}
+          | REF       {$$ = str_new(yytext);}
 
-id_d:   ID {fprintf(stderr, "YYTEXT_ID: %s", yytext); $$ = str_new(yytext);}
+id_d:   ID {$$ = str_new(yytext);}
 
 tuple :
-            LPAR elements RPAR        {$$ = typecheck_tuple($2, yylineno);}
+            LPAR exp elements RPAR        {$$ = typecheck_tuple(typecheck_elements($2, $3, yylineno), yylineno);}
           | LPAR RPAR                 {$$ = typecheck_tuple(NULL, yylineno);}
 elements :
-            and COM elements          {$$ = typecheck_elements($1, $3, yylineno);}
-          | and                       {List list = list_new(); list_append(list, $1); $$ = list;}
+            COM exp elements          {$$ = typecheck_elements($2, $3, yylineno);}
+          | epsilon                   {$$ = list_new();}
           
 /* block */
 assign :    
@@ -95,7 +96,7 @@ while :
 let :
             {push_scope("Let");} LET repexp IN repexp END  {pop_scope(); $$ = typecheck_let($4, yylineno);}
 repexp :
-            exp S_COL repexp {$$ = $2;}
+            exp S_COL repexp {$$ = $3;} 
           | exp {$$ = $1;}
           | exp S_COL {$$ = $1;}
 dec :
@@ -124,11 +125,11 @@ ref :
 fundec :
             FUN id_d {push_scope("Fun dec");} funargs EQ exp { pop_scope(); typecheck_fun_dec($2, $3, $5, yylineno); }
 funargs :
-            LPAR decargs RPAR {$$ = $2;}
+            LPAR decargs RPAR {$$ = type_new(T_TUPLE, $2);}
           | LPAR RPAR {$$ = NULL;}
           | argdef {$$ = $1;}
 decargs :
-            argdef COM decargs {list_prepend($2, $1); $$ = $3;}
+            argdef COM decargs {list_prepend($3, $1); $$ = $3;}
           | argdef {List list = list_new(); list_append(list, $1); $$ = list;}
 argdef :    
             id_d tvar {$$ = typecheck_add_var($1, $2, yylineno);}

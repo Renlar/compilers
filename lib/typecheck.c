@@ -45,6 +45,15 @@ Type typecheck_arith(Type t1, OP op, Type t2, int line) {
     b = T_BOOL;
   } else if (op == OP_INTDIV || op == OP_MOD) {
     b = T_INT;
+  } else if (OP_EQ <= op && op <= OP_NEQ) {
+    if (type_base(t1) != type_base(t2)) {
+      fprintf(stderr, "ERROR: Type Mismatch near line: %u, expected: (%s %s %s), received: (%s %s %s).\n",
+              line, btype_to_str(b), op_to_str(op), btype_to_str(b),
+              btype_to_str(type_base(t1)), op_to_str(op), btype_to_str(type_base(t2)));
+    }
+    //type_destroy(t1);
+    //type_destroy(t2);
+    return type_new(T_BOOL, NULL);
   } else {
     if (type_base(t1) == T_REAL || type_base(t1) == T_INT) {
       b = type_base(t1);
@@ -59,8 +68,8 @@ Type typecheck_arith(Type t1, OP op, Type t2, int line) {
             line, btype_to_str(b), op_to_str(op), btype_to_str(b),
             btype_to_str(type_base(t1)), op_to_str(op), btype_to_str(type_base(t2)));
   }
-  type_destroy(t1);
-  type_destroy(t2);
+  //type_destroy(t1);
+  //type_destroy(t2);
   return type_new(b, NULL);
 }
 
@@ -86,8 +95,8 @@ Type typecheck_concat(Type t1, Type t2, int line) {
   } else {
     fprintf(stderr, "ERROR: Type Mismatch near line %u, expected list :: list, list :: element, element :: list, or type_1 :: type_1, received: %s :: %s\n",
             line, type_to_str(t1), type_to_str(t2));
-    type_destroy(t1);
-    type_destroy(t2);
+    //type_destroy(t1);
+    //type_destroy(t2);
     // Prevent errors from propigating as much as possible return a nil list so
     // it is compatable with as much as possible.
     return type_new(T_LIST, NULL);
@@ -143,12 +152,12 @@ Type typecheck_id_access(str name, int line) {
   Fun fun = scope_find_fun(current, name);
   if (var) {
     ret = type_clone(var_type(var));
-    if (type_list_type_defined(var_type(var))) {
+    if (type_base(var_type(var)) == T_LIST && !type_base_defined(var_type(var))) {
       fprintf(stderr, "ERROR; line: %u, List variable, %s, used which has undefined base type\n",
               line, name);
     }
   } else if (fun) { 
-    if (fun_takes_args(fun, type_new(T_VOID, NULL))) {
+    if (type_assign_cast(fun_ret_type(fun), type_new(T_VOID, NULL), line)) {
       ret = type_clone(fun_ret_type(fun));
     } else {
       fprintf(stderr, "ERROR: line: %u Function, %s requires arguments, %s, given VOID.\n",
@@ -176,7 +185,7 @@ Type typecheck_fun_call(str name, Type args, int line) {
     } else if (!strcmp(name, "hd")) {
       return list_head(type_sub(args));
     } else {
-      return list_tail(type_sub(args));
+      return args;
     }
   } else if (!strcmp(name, "!")) {
     if (type_base(args) == T_REF) {
@@ -193,7 +202,7 @@ Type typecheck_fun_call(str name, Type args, int line) {
   Fun fun = scope_find_fun(current, name);
   if (fun == NULL) {
     fprintf(stderr, "ERROR: near line: %u, Implicit declaration of function, %s(%s)\n", line, name, type_to_str(args));
-  } else if (!fun_takes_args(fun, args)) {
+  } else if (!type_assign_cast(fun_arg_type(fun), args, line)) {
     fprintf(stderr, "ERROR: line: %u Argument type mismatch for function, %s, Expected: %s, Received: %s\n",
             line, name, type_to_str(fun_arg_type(fun)), type_to_str(args));
   }
@@ -229,11 +238,11 @@ Type typecheck_assign(str id, Type type, int line) {
   if (var == NULL) {
     fprintf(stderr, "ERROR: Undefined identifier, line: %u,  Attempted to assign a value of type, %s, to identifier, \'%s\', which is not defined in the current scope.\n",
             line, type_to_str(type), id);
-  } else if (!type_eq(var_type(var), type)) {
+  } else if (!type_assign_cast(var_type(var), type, line)) {
     fprintf(stderr, "ERROR: Variable Assignment Type Mismatch near line: %u, Identifier, %s, of type: %s, Received: %s\n",
             line, id, type_to_str(var_type(var)), type_to_str(type));
   }
-  type_destroy(type);
+  //type_destroy(type);
   return type_new(T_VOID, NULL);
 }
 
@@ -247,7 +256,7 @@ Type typecheck_if(Type cond, Type b_then, Type b_else, int line) {
     fprintf(stderr, "ERROR: Type Mismatch near line: %u, Missmatched return type for if block. Expected: then and else types to match, Received: then %s else %s\n",
             line, type_to_str(b_then), type_to_str(b_else));
   }
-  type_destroy(cond);
+  //type_destroy(cond);
   //type_destroy(b_else);
   return b_then;
 }
@@ -302,15 +311,18 @@ Type typecheck_type_basic(TYPE_BASE base, Type ref, int line) {
 // TODO: double check logic
 Type typecheck_type_basic_list(Type base, Type list, int line) {
   Type ret;
-  if (list != NULL && base != NULL) {
-    List sub = type_sub(list);
-    while (list_head(sub) != NULL) {
-      sub = type_sub(list_head(sub));
+  if (list != NULL) {
+    ret = list;
+    if (base != NULL) {
+      List sub = type_sub(list);
+      while (list_head(sub) != NULL) {
+        if (type_sub(list_head(sub)) == NULL) {
+          ((Type)list_head(sub))->sub = list_new();
+        }
+          sub = type_sub(list_head(sub));
+      }
+      list_append(sub, base);
     }
-    list_append(sub, base);
-    ret = list;
-  } else if (list != NULL) {
-    ret = list;
   } else if (base != NULL) {
     ret = base;
   }
@@ -363,8 +375,8 @@ void add_var(Var var, int line) {
   }
   if (scope_get_var(current, var_symbol(var)) || scope_get_fun(current, var_symbol(var))) {
     fprintf(stderr, "ERROR: line %u Redeclaration of identifier %s\n", line, var_symbol(var));
-    scope_add_var(current, var);
   }
+  scope_add_var(current, var);
 }
 
 

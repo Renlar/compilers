@@ -75,6 +75,6 @@ str type_to_str(Type type);
  * returns false if basic type is not defined or type passed in is not a list
  * or ref to a list
  */
-bool type_list_type_defined(Type type);
+bool type_base_defined(Type type);
 
 #endif//COMP_TYPE

@@ -14,7 +14,7 @@ Type type_new(TYPE_BASE base, List sub) {
   type->base = base;
   type->sub = sub;
   if ((base != T_LIST && base != T_TUPLE && base != T_REF) && sub != NULL) {
-    fprintf(stderr, "TYPE_BASE_WARNING: found %s with subtypes, expected LIST or TUPLE.\n", btype_to_str(base));
+    fprintf(stderr, "TYPE_BASE_WARNING: found %s with subtypes, expected REF, LIST or TUPLE.\n", btype_to_str(base));
   }
   if (base == T_REF) {
     if (list_size(sub) > 1) {
@@ -136,13 +136,16 @@ Type type_assign_cast(Type lhs, Type rhs, int line) {
   }
   if (lhs != NULL && type_base(lhs) != T_LIST) {
     ret = lhs;
-    if (!type_eq(lhs, rhs)) {
-      fprintf(stderr, "ERROR: near line: %u TYpe mismatch on variable declaration.", line);
+    List sub = list_new();
+    list_append(sub, rhs);
+    Type refrhs = type_new(T_REF, sub);
+    if (!type_eq(lhs, rhs) && !type_eq(lhs, refrhs)) {
+      fprintf(stderr, "ERROR: near line: %u Type mismatch on value assignment.", line);
     }
   } else if (void_list(lhs)) {
     if (void_list(rhs)) {
       ret = lhs;
-      fprintf(stderr, "ERROR: near line: %u Unknown basic type for List, creating null list.", line);
+      fprintf(stderr, "ERROR: near line: %u Unknown basic type for List. Creating null list.", line);
     } else {
       ret = rhs;
     }
@@ -234,7 +237,7 @@ str type_to_str(Type type) {
 }
 
 
-bool type_list_type_defined(Type type) {
+bool type_base_defined(Type type) {
   if (type == NULL) {
     return false;
   }
@@ -243,6 +246,7 @@ bool type_list_type_defined(Type type) {
     if (type_base(list_head(sub)) == T_REAL || type_base(list_head(sub)) == T_INT || type_base(list_head(sub)) == T_BOOL) {
       return true;
     }
+    sub = type_sub(list_head(sub));
   }
   return false;
 }

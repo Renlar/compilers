@@ -45,10 +45,15 @@ List list_new() {
 }
 
 List list_clone(List list, Anom (*clone)(Anom)) {
+  if (list == NULL) {
+    return NULL;
+  }
   List n = list_new();
   ListNode prev = NULL;
   void make_node(Anom anom) {
-    prev = listnode_new(clone(anom), prev, NULL, n);
+    if (anom != NULL) {
+      prev = listnode_new(clone(anom), prev, NULL, n);
+    }
   }
   list_for_each(list, make_node);
   return n;
@@ -319,6 +324,8 @@ bool list_equal(List l1, List l2, bool (*eq)(Anom, Anom)) {
     if (!(*eq)(cur1->data, cur2->data)) {
       return false;
     }
+    cur1 = cur1->next;
+    cur2 = cur2->next;
   }
   if ((cur1 == NULL && cur2 != NULL) ||
       (cur1 != NULL && cur2 == NULL)) {
