@@ -12,14 +12,17 @@ str op_to_str(OP op) {
   return OP_STR[op];
 }
 
+
 void typecheck_init() {
   current = scope_new("Global", NULL);
   typecheck_init_lang_defs();
 }
 
+//TODO: initialized language constants, like hd and tl.
 void typecheck_init_lang_defs() {
-  
+  scope_add_fun(current, fun_new("not", type_new(T_BOOL, NULL), type_new(T_BOOL, NULL)));
 }
+
 
 void typecheck_destroy() {
   while (current != NULL) {
@@ -52,7 +55,7 @@ Type typecheck_arith(Type t1, OP op, Type t2, int line) {
     }
   }
   if (type_base(t1) != b || type_base(t2) != b) {
-    fprintf(stderr, "TYPE_ERROR: line: %u, expected: (%s %s %s), received: (%s %s %s).\n",
+    fprintf(stderr, "ERROR: Type Mismatch near line: %u, expected: (%s %s %s), received: (%s %s %s).\n",
             line, btype_to_str(b), op_to_str(op), btype_to_str(b),
             btype_to_str(type_base(t1)), op_to_str(op), btype_to_str(type_base(t2)));
   }
@@ -61,95 +64,263 @@ Type typecheck_arith(Type t1, OP op, Type t2, int line) {
   return type_new(b, NULL);
 }
 
+//TODO: method should be checked thourally against spec rules 6
+//TODO: ADD checks for VOID type and error on it.
 Type typecheck_concat(Type t1, Type t2, int line) {
-  if (type_base(t1) != T_LIST && type_base(t2) != T_LIST){
-    fprintf(stderr, "", line);
+  Type list;
+  Type concat;
+  // Simple comparison, types currently must be exactly the same to create a
+  // list from them.
+  if (type_base(t1) != T_LIST && type_base(t2) != T_LIST && type_eq(t1, t2)) {
+    List sub = list_new();  list_append(sub, t1);
+    list = type_new(T_LIST, sub);
+    concat = t2;
+  } else if (type_base(t1) == T_LIST) {
+    list = t1;
+    concat = t2;
+    // Check to ensure concat is done below. 
+  } else if (type_base(t2) == T_LIST) {
+    list = t2;
+    concat = t1;
+    // Check to ensure concat is done below. 
+  } else {
+    fprintf(stderr, "ERROR: Type Mismatch near line %u, expected list :: list, list :: element, element :: list, or type_1 :: type_1, received: %s :: %s\n",
+            line, type_to_str(t1), type_to_str(t2));
+    type_destroy(t1);
+    type_destroy(t2);
+    // Prevent errors from propigating as much as possible return a nil list so
+    // it is compatable with as much as possible.
+    return type_new(T_LIST, NULL);
   }
-  if (type_base(t2) != T_LIST || type_base(t2) != ) {
-    
+  
+  if (type_base(concat) == T_LIST) {
+    if (type_eq(list_head(type_sub(list)), list_head(type_sub(concat)))) {
+      list_append_list(type_sub(list), type_sub(concat));
+    }
+  } else if (type_eq(list_head(type_sub(list)), concat)) {
+    // TODO: analize if the following statement is the correct way to handle a
+    // list type or if the following should be destroyed instead.
+    // Store the second eqivalent type for comparison purposes?
+    list_append(type_sub(list), concat);  //TODO: analyze if this tatement is correct.
+  } else if (list_size(type_sub(list)) == 0) {
+    list_append(type_sub(list), concat);  //TODO: Should error on empty list according to requirement 6;
   }
+  return list;
 }
+
 
 Type typecheck_list(List types, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_list Unimplemented.\n");
-  return type_new(T_ERROR, NULL);
+  bool same = true;
+  Type first = NULL;
   
+  //Start nested function op
+  void op(Type t) {
+    if (first == NULL) {
+      first = t;
+      return;
+    }
+    if (type_base(first) != type_base(t)) {
+      same = false;
+    }
+  }
+  //end nested function op
+  
+  list_for_each(types, (void (*)(Anom))op);
+  if (!same) {
+    fprintf(stderr, "ERROR: near line: %u, list constructor passed list of incompatable types.\n", line);
+  }
+  List sub = list_new();
+  if (list_head(types) != NULL) {
+    list_append(sub, list_head(types));
+  }
+  return type_new(T_LIST, sub);
 }
 
+
 Type typecheck_id_access(str name, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_id_access Unimplemented.\n");
-  return type_new(T_ERROR, NULL);
-  
+  Type ret;
+  Var var = scope_find_var(current, name);
+  Fun fun = scope_find_fun(current, name);
+  if (var) {
+    ret = type_clone(var_type(var));
+    if (type_list_type_defined(var_type(var))) {
+      fprintf(stderr, "ERROR; line: %u, List variable, %s, used which has undefined base type\n",
+              line, name);
+    }
+  } else if (fun) { 
+    if (fun_takes_args(fun, type_new(T_VOID, NULL))) {
+      ret = type_clone(fun_ret_type(fun));
+    } else {
+      fprintf(stderr, "ERROR: line: %u Function, %s requires arguments, %s, given VOID.\n",
+              line, name, type_to_str(fun_arg_type(fun)));
+      ret = type_new(T_ERROR, NULL);
+    }
+  } else {
+    fprintf(stderr, "ERROR: line: %u, Access of Undefined identifier, %s\n", line, name);
+    ret = type_new(T_ERROR, NULL);
+  }
+  return ret;
 }
+
 
 Type typecheck_const(TYPE_BASE base, int line) {
   return type_new(base, NULL);
 }
 
+
 Type typecheck_fun_call(str name, Type args, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_fun_call Unimplemented.\n");
-  return type_new(T_ERROR, NULL);
-  
+  if (!strcmp(name, "hd") || !strcmp(name, "tl")) {
+    if (type_base(args) != T_LIST) {
+      fprintf(stderr, "ERROR: near line: %u, function %s received: %s, expected: LIST\n", line, name, type_to_str(args));
+      return args;
+    } else if (!strcmp(name, "hd")) {
+      return list_head(type_sub(args));
+    } else {
+      return list_tail(type_sub(args));
+    }
+  } else if (!strcmp(name, "!")) {
+    if (type_base(args) == T_REF) {
+      return list_head(type_sub(args));
+    } else {
+      fprintf(stderr, "ERROR: near line: %u function %s received type, %s, expected REF\n", line, name, type_to_str(args));
+      return args;
+    }
+  } else if (!strcmp(name, "ref")) {
+    List sub = list_new();
+    list_append(sub, args);
+    return type_new(T_REF, sub);
+  }
+  Fun fun = scope_find_fun(current, name);
+  if (fun == NULL) {
+    fprintf(stderr, "ERROR: near line: %u, Implicit declaration of function, %s(%s)\n", line, name, type_to_str(args));
+  } else if (!fun_takes_args(fun, args)) {
+    fprintf(stderr, "ERROR: line: %u Argument type mismatch for function, %s, Expected: %s, Received: %s\n",
+            line, name, type_to_str(fun_arg_type(fun)), type_to_str(args));
+  }
+  return type_clone(fun_ret_type(fun));
 }
+
 
 void typecheck_fun_dec(str name, Type args, Type ret, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_concat Unimplemented.\n");
+  if (scope_get_fun(current, name)) {
+    fprintf(stderr, "ERROR: line %u Redeclaration of identifier %s\n", line, name);
+    return;
+  }
+  Fun fun = fun_new(name, ret, args);
+  scope_add_fun(current, fun);
 }
 
+//TODO: check this method again for any error checking or type filtering that should be added.
+//TODO: ADD checks for VOID type and error on it.
 Type typecheck_tuple(List types, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_tuple Unimplemented.\n");
-  return type_new(T_ERROR, NULL);
+  return type_new(T_TUPLE, types);
 }
 
+//TODO: check this method again for any error checking/ type filtering that should be added.
+//TODO: ADD checks for VOID type and error on it.
 List typecheck_elements(Type type, List typelist, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_elements Unimplemented.\n");
-  return list_new();
+  list_prepend(typelist, type);
+  return typelist;
 }
+
 
 Type typecheck_assign(str id, Type type, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_assign Unimplemented.\n");
-  return type_new(T_ERROR, NULL);
+  Var var = get_var(id);
+  if (var == NULL) {
+    fprintf(stderr, "ERROR: Undefined identifier, line: %u,  Attempted to assign a value of type, %s, to identifier, \'%s\', which is not defined in the current scope.\n",
+            line, type_to_str(type), id);
+  } else if (!type_eq(var_type(var), type)) {
+    fprintf(stderr, "ERROR: Variable Assignment Type Mismatch near line: %u, Identifier, %s, of type: %s, Received: %s\n",
+            line, id, type_to_str(var_type(var)), type_to_str(type));
+  }
+  type_destroy(type);
+  return type_new(T_VOID, NULL);
 }
+
 
 Type typecheck_if(Type cond, Type b_then, Type b_else, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_if Unimplemented.\n");
-  return type_new(T_ERROR, NULL);
+  if (type_base(cond) != T_BOOL) {
+    fprintf(stderr, "ERROR: Type Mismatch near line: %u, Expected: if %s,  Received: if %s\n",
+            line, btype_to_str(T_BOOL), type_to_str(cond));
+  }
+  if (!type_eq(b_then, b_else)) {
+    fprintf(stderr, "ERROR: Type Mismatch near line: %u, Missmatched return type for if block. Expected: then and else types to match, Received: then %s else %s\n",
+            line, type_to_str(b_then), type_to_str(b_else));
+  }
+  type_destroy(cond);
+  //type_destroy(b_else);
+  return b_then;
 }
+
 
 Type typecheck_while(Type cond, Type b_while, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_while Unimplemented.\n");
-  return type_new(T_ERROR, NULL);
+  if (type_base(cond) != T_BOOL) {
+    fprintf(stderr, "ERROR: Type Mismatch near line: %u, Expected: if %s,  Received: if %s\n",
+            line, btype_to_str(T_BOOL), type_to_str(cond));
+  }
+  return type_new(T_VOID, NULL);
 }
+
 
 Type typecheck_let(Type b_in, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_let Unimplemented.\n");
-  return type_new(T_ERROR, NULL);
+  return b_in;
 }
+
 
 Type typecheck_dec(str id, Type type, Type b_eq, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_dec Unimplemented.\n");
-  return type_new(T_ERROR, NULL);
+  if ((type = type_assign_cast(type, b_eq, line))) {
+    add_var(var_new(id, type), line);
+  }
+  return type_clone(type);
 }
+
 
 Type typecheck_type_ref(Type sub_ref, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_type_ref Unimplemented.\n");
-  return type_new(T_ERROR, NULL);
+  List list = list_new();
+  if (sub_ref != NULL) {
+    list_append(list, sub_ref);
+  }
+  return type_new(T_REF, list);
 }
 
-Type typecheck_type_basic(TYPE_BASE basic, Type ref, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_type_basic Unimplemented.\n");
-  return type_new(T_ERROR, NULL);
+
+Type typecheck_type_basic(TYPE_BASE base, Type ref, int line) {
+  Type ret;
+  if (ref != NULL) {
+    List sub = type_sub(ref);
+    while (list_head(sub) != NULL) {
+      sub = type_sub(list_head(sub));
+    }
+    list_append(sub, type_new(base, NULL));
+    ret = ref;
+  } else {
+    ret = type_new(base, NULL);
+  }
+  return ret;
 }
 
+// TODO: double check logic
 Type typecheck_type_basic_list(Type base, Type list, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_type_basic_list Unimplemented.\n");
-  return type_new(T_ERROR, NULL);
-  
+  Type ret;
+  if (list != NULL && base != NULL) {
+    List sub = type_sub(list);
+    while (list_head(sub) != NULL) {
+      sub = type_sub(list_head(sub));
+    }
+    list_append(sub, base);
+    ret = list;
+  } else if (list != NULL) {
+    ret = list;
+  } else if (base != NULL) {
+    ret = base;
+  }
+  return ret;
 }
+
 
 Type typecheck_add_var(str name, Type type, int line) {
-  fprintf(stderr, "IMPLEMENTATION ERROR: typecheck_add_var Unimplemented.\n");
-  return type_new(T_ERROR, NULL);
+  add_var(var_new(name, type), line);
+  return type;
 }
 
 
@@ -161,20 +332,22 @@ int get_scope_depth() {
   return scope_depth(current);
 }
 
+
 void push_scope(str name) {
   if (current == NULL) {
-    printf("SCOPE_WARNING: push_scope: Current scope is null. Pusing %s as global scope.", name);
+    printf("SCOPE_WARNING: push_scope: Current scope is null. Pusing %s as global scope.\n", name);
   }
   current = scope_new(name, current);
 }
 
+
 void pop_scope() {
   if (current == NULL) {
-    printf("SCOPE_ERROR: pop_scope: FALTAL current scope is null.  Did you forget to push a global scope first?");
+    printf("SCOPE_ERROR: pop_scope: FALTAL current scope is null.  Did you forget to push a global scope first?\n");
     return;
   }
   if (scope_parent(current) == NULL) {
-    printf("SCOPE_ERROR: pop_scope: called when only global scope remains. Cowardly, Refusing to pop global scope.");
+    printf("SCOPE_ERROR: pop_scope: called when only global scope remains. Cowardly, Refusing to pop global scope.\n");
     return;
   }
   Scope prev = current;
@@ -182,13 +355,18 @@ void pop_scope() {
   scope_destroy(prev);
 }
 
-void add_var(Var var) {
+//TODO: add line based error reporting for existing variables.
+void add_var(Var var, int line) {
   if (current == NULL) {
-    printf("SCOPE_ERROR: add_var: FALTAL current scope is null.  Did you forget to push a global scope first?");
+    printf("SCOPE_ERROR: add_var: FALTAL current scope is null.  Did you forget to push a global scope first?\n");
     return;
   }
-  scope_add_var(current, var);
+  if (scope_get_var(current, var_symbol(var)) || scope_get_fun(current, var_symbol(var))) {
+    fprintf(stderr, "ERROR: line %u Redeclaration of identifier %s\n", line, var_symbol(var));
+    scope_add_var(current, var);
+  }
 }
+
 
 Var get_var(str symbol) {
   return scope_find_var(current, symbol);

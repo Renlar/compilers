@@ -11,7 +11,7 @@
 #include "lib/typecheck.h"
 
 #define YYDEBUG 1
-#define YYSTYPE Type
+#define YYSTYPE Anom
 extern int yylineno;
 extern str yytext;
 str yytprev;
@@ -58,7 +58,7 @@ list :
           | NIL {$$ = typecheck_list(NULL, yylineno);}
           | val {$$ = $1;}
 val :
-            ID        {$$ = typecheck_id_access(yytext, yylineno);}
+            id_d        {$$ = typecheck_id_access($1, yylineno);}
           | INT       {$$ = typecheck_const(T_INT, yylineno);}
           | REAL      {$$ = typecheck_const(T_REAL, yylineno);}
           | NEG INT   {$$ = typecheck_const(T_INT, yylineno);}
@@ -68,14 +68,17 @@ val :
 fun_call :
             id tuple  {$$ = typecheck_fun_call($1, $2, yylineno);}
           | id exp    {$$ = typecheck_fun_call($1, $2, yylineno);}
-          | ID tuple  {$$ = typecheck_fun_call(yytext, $2, yylineno);}
-          | ID exp    {$$ = typecheck_fun_call(yytext, $2, yylineno);}
+          | id_d tuple  {$$ = typecheck_fun_call($1, $2, yylineno);}
+          | id_d exp    {$$ = typecheck_fun_call($1, $2, yylineno);}
 id :
-            HD        {$$ = yytext;}
-          | DREF      {$$ = yytext;}
-          | NOT       {$$ = yytext;}
-          | TL        {$$ = yytext;}
-          | REF       {$$ = yytext;}
+            HD        {$$ = strdup(yytext);}
+          | DREF      {$$ = strdup(yytext);}
+          | NOT       {$$ = strdup(yytext);}
+          | TL        {$$ = strdup(yytext);}
+          | REF       {$$ = strdup(yytext);}
+
+id_d:   ID {$$ = yytext;}
+
 tuple :
             LPAR elements RPAR        {$$ = typecheck_tuple($1, yylineno);}
           | LPAR RPAR                 {$$ = typecheck_tuple(NULL, yylineno);}
@@ -87,7 +90,7 @@ elements :
 assign :    
             assign_d exp             {$$ = typecheck_assign($1, $2, yylineno);}
 assign_d:
-            ID {$$ = yytext;} ASSIGN
+            id_d {$$ = strdup(yytext);} ASSIGN
 if :
             {push_scope("If");} IF exp THEN {push_scope("Then");} exp {pop_scope();}  ELSE {push_scope("Else");} exp {pop_scope(); pop_scope(); $$ = typecheck_if($1, $2, $3, yylineno);}
 while :
@@ -102,7 +105,7 @@ dec :
             dec_d tvar EQ {push_scope("Var Dec");} exp {pop_scope(); $$ = typecheck_dec($1, $2, $3, yylineno);}
 
 dec_d:
-            VAL ID {$$ = yytext;}
+            VAL id_d {$$ = $1;}
 
 /*types*/
 tvar :
@@ -124,9 +127,9 @@ ref :
           | epsilon {$$ = NULL;}
 /* functions */
 fundec :
-            fundec_d {push_scope($1);} funargs EQ exp { pop_scope(); typecheck_fun_dec($1, $2, $3, yylineno); }
+            fundec_d {push_scope("Fun dec");} funargs EQ exp { pop_scope(); typecheck_fun_dec($1, $2, $3, yylineno); }
 fundec_d:
-            FUN ID {$$ = yytext;}
+           FUN id_d {$$ = $1;}
 funargs :
             LPAR decargs RPAR {$$ = $1;}
           | LPAR RPAR {$$ = NULL;}
@@ -135,18 +138,18 @@ decargs :
             argdef COM decargs {list_prepend($2, $1); $$ = $2;}
           | argdef {List list = list_new(); list_append(list, $1); $$ = list;}
 argdef :    
-            ID {yytprev = yytext;} tvar {$$ = typecheck_add_var(yytprev, $1, yylineno);}
+            id_d {yytprev = $1;} tvar {$$ = typecheck_add_var(yytprev, $2, yylineno);}
             
 /* misc //may need to insert into parent rules to simplify type checking.*/
 comp_op :
-          EQ {$$ = (Type)OP_EQ;} | LT {$$ = (Type)OP_LT;}
-        | GT {$$ = (Type)OP_GT;} | GEQ {$$ = (Type)OP_GEQ;}
-        | LEQ {$$ = (Type)OP_LEQ;}| NEQ {$$ = (Type)OP_NEQ;}
+          EQ {$$ = (Anom)OP_EQ;} | LT {$$ = (Anom)OP_LT;}
+        | GT {$$ = (Anom)OP_GT;} | GEQ {$$ = (Anom)OP_GEQ;}
+        | LEQ {$$ = (Anom)OP_LEQ;}| NEQ {$$ = (Anom)OP_NEQ;}
 add_op :
-          PLUS {$$ = (Type)OP_PLUS;} | MINUS {$$ = (Type)OP_MINUS;}
+          PLUS {$$ = (Anom)OP_PLUS;} | MINUS {$$ = (Anom)OP_MINUS;}
 mult_op : 
-          MULT {$$ = (Type)OP_MULT;} | DIV {$$ = (Type)OP_DIV;}
-        | INTDIV {$$ = (Type)OP_INTDIV;} | MOD {$$ = (Type)OP_MOD;}
+          MULT {$$ = (Anom)OP_MULT;} | DIV {$$ = (Anom)OP_DIV;}
+        | INTDIV {$$ = (Anom)OP_INTDIV;} | MOD {$$ = (Anom)OP_MOD;}
 epsilon : /* epsilon */
 %%
 

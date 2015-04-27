@@ -1,4 +1,5 @@
 #include "scope.h"
+#include "string.h"
 
 const int sizeof_scope = sizeof(scope);
 
@@ -22,7 +23,7 @@ Scope scope_parent(Scope scope) {
   if (scope != NULL) {
     return scope->parent;
   }
-  printf("SCOPE_VAR_WARNING: scope_parent: received NULL argument, scope.\n");
+  fprintf(stderr, "SCOPE_VAR_WARNING: scope_parent: received NULL argument, scope.\n");
   return NULL;
 }
 
@@ -30,7 +31,7 @@ str scope_name(Scope scope) {
   if (scope != NULL) {
     return scope->name;
   }
-  printf("SCOPE_VAR_WARNING: scope_name: received NULL argument, scope.\n");
+  fprintf(stderr, "SCOPE_VAR_WARNING: scope_name: received NULL argument, scope.\n");
   return NULL;  //TODO: return empty string instead?
 }
 
@@ -38,13 +39,13 @@ List scope_vars(Scope scope) {
   if (scope != NULL) {
     return scope->vars;
   }
-  printf("SCOPE_VAR_WARNING: scope_vars: received NULL argument, scope.\n");
+  fprintf(stderr, "SCOPE_VAR_WARNING: scope_vars: received NULL argument, scope.\n");
   return NULL;
 }
 
 Var scope_get_var(Scope scope, str symbol) {
   if (scope == NULL || symbol == NULL) {
-    printf("SCOPE_VAR_WARNING: scope_get_var: received NULL argument, scope and/or symbol.\n");
+    fprintf(stderr, "SCOPE_VAR_WARNING: scope_get_var: received NULL argument, scope and/or symbol.\n");
     return NULL;
   }
   bool eq(Var var, str symbol) {
@@ -76,12 +77,12 @@ bool scope_var_exists(Scope scope, str symbol) {
 void scope_add_var(Scope scope, Var var) {
   if (scope != NULL || var != NULL) {
     if (scope_has_var(scope, var_symbol(var))) {
-      printf("SCOPE_VAR_WARNING: scope_add_var: var %s already defined in the current scope.\n", var_symbol(var));
+      fprintf(stderr, "SCOPE_VAR_WARNING: scope_add_var: var %s already defined in the current scope.\n", var_symbol(var));
     } else {
       list_append(scope_vars(scope), var);
     }
   } else {
-    printf("SCOPE_VAR_WARNING: scope_add_var: received NULL argument, scope and/or var.\n");
+    fprintf(stderr, "SCOPE_VAR_WARNING: scope_add_var: received NULL argument, scope and/or var.\n");
   }
 }
 
@@ -89,18 +90,21 @@ List scope_funs(Scope scope) {
   if (scope != NULL) {
     return scope->funs;
   }
-  printf("SCOPE_VAR_WARNING: scope_funs: received NULL argument, scope.\n");
+  fprintf(stderr, "SCOPE_VAR_WARNING: scope_funs: received NULL argument, scope.\n");
   return NULL;
 }
 
 Fun scope_get_fun(Scope scope, str symbol) {
   if (scope == NULL || symbol == NULL) {
-    printf("SCOPE_VAR_WARNING: scope_get_fun: received NULL argument, scope and/or symbol.\n");
+    fprintf(stderr, "SCOPE_VAR_WARNING: scope_get_fun: received NULL argument, scope and/or symbol.\n");
     return NULL;
   }
   bool eq(Fun fun, str symbol) {
     if (fun != NULL) {
-      return (bool) !strcmp(fun_name(fun), symbol);
+      str funname = fun_name(fun);
+      if (funname != NULL) {
+        return (bool) !strcmp(funname, symbol);
+      }
     }
     return false;
   }
@@ -127,12 +131,12 @@ bool scope_fun_exists(Scope scope, str symbol) {
 void scope_add_fun(Scope scope, Fun fun) {
   if (scope != NULL || fun != NULL) {
     if (scope_has_fun(scope, fun_symbol(fun))) {
-      printf("SCOPE_VAR_WARNING: scope_add_fun: fun %s already defined in the current scope.\n", fun_symbol(fun));
+      fprintf(stderr, "SCOPE_VAR_WARNING: scope_add_fun: fun %s already defined in the current scope.\n", fun_symbol(fun));
     } else {
       list_append(scope_funs(scope), fun);
     }
   } else {
-    printf("SCOPE_VAR_WARNING: scope_add_fun: received NULL argument, scope and/or fun.\n");
+    fprintf(stderr, "SCOPE_VAR_WARNING: scope_add_fun: received NULL argument, scope and/or fun.\n");
   }
 }
 
@@ -143,7 +147,7 @@ int scope_depth(Scope scope) {
     depth++;
   }
   if (depth == -1) {
-    printf("SCOPE_VAR_WARNING: scope_depth: received NULL argument, scope.\n");
+    fprintf(stderr, "SCOPE_VAR_WARNING: scope_depth: received NULL argument, scope.\n");
   }
   return depth;
 }

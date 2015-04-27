@@ -24,7 +24,7 @@ static const str OP_STR[] =
       "=\0", "<\0", ">\0", "<=\0", ">=\0", "<>\0", 
       "+\0", "-\0", "*\0", "/\0", "div\0", "mod\0"
     };
-    
+
 str op_to_str(OP op);
 
 void typecheck_init();
@@ -96,7 +96,7 @@ void pop_scope();
 /*
  * Add a variable to the current scope
  */
-void add_var(Var var);
+void add_var(Var var, int line);
 
 /*
  * Get the the var by name if it is in scope.

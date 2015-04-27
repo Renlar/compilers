@@ -13,20 +13,28 @@ Type type_new(TYPE_BASE base, List sub) {
   Type type = malloc(sizeof_type);
   type->base = base;
   type->sub = sub;
-  if ((base != T_LIST || base != T_TUPLE || base != T_REF) && sub != NULL) {
-    printf("TYPE_BASE_ERROR: found %s with subtypes, expected LIST or TUPLE.\n", btype_to_str(base));
+  if ((base != T_LIST && base != T_TUPLE && base != T_REF) && sub != NULL) {
+    fprintf(stderr, "TYPE_BASE_WARNING: found %s with subtypes, expected LIST or TUPLE.\n", btype_to_str(base));
   }
   if (base == T_REF) {
     if (list_size(sub) > 1) {
-      printf("TYPE_BASE_ERROR: Found base type REF with more than a single subtype.");
+      fprintf(stderr, "TYPE_BASE_WARNING: Found base type REF with more than a single subtype.\n");
     }
   }
   if (base == T_LIST) {
     if (!type_list_valid(type)) {
-      printf("TYPE_BASE_ERROR: Found base type LIST with multiple subtypes, Expected single subtype.\n");
+      fprintf(stderr, "TYPE_BASE_WARNING: Found base type LIST with multiple subtypes, Expected single subtype.\n");
     }
   }
   return type;
+}
+
+
+Type type_clone(Type type) {
+  if (type != NULL) {
+    return type_new(type_base(type), list_clone(type_sub(type), (Anom (*)(Anom))type_clone));
+  }
+  return NULL;
 }
 
 
@@ -43,7 +51,7 @@ void type_destroy(Type t) {
 
 TYPE_BASE type_base(Type type) {
   if (type == NULL) {
-    printf("TYPE_BASE_ERROR: type_base: received NULL argument, type.");
+    fprintf(stderr, "TYPE_BASE_WARNING: type_base: received NULL argument, type.\n");
     return T_ERROR;
   }
   return type->base;
@@ -52,7 +60,7 @@ TYPE_BASE type_base(Type type) {
 
 List type_sub(Type type) {
   if (type == NULL) {
-    printf("TYPE_BASE_ERROR: type_sub: received NULL argument, type.");
+    fprintf(stderr, "TYPE_BASE_WARNING: type_sub: received NULL argument, type.\n");
     return NULL;
   }
   return type->sub;
@@ -71,7 +79,7 @@ bool type_eq(Type t1, Type t2) {
 //TODO: add special handling for lists and tuples.
 Type type_upcast(Type t1, Type t2) {
   if (t1 == NULL || t2 == NULL) {
-    printf("TYPE_BASE_CAST_ERROR: type_upcast: received NULL type.\n");
+    fprintf(stderr, "TYPE_BASE_CAST_WARNING: type_upcast: received NULL type.\n");
     return NULL;
   }
   
@@ -88,28 +96,58 @@ Type type_upcast(Type t1, Type t2) {
   if (bt != T_ERROR && !list_find(sub, (bool (*)(Anom, Anom))eq, NULL) && !list_find(sub, (bool (*)(Anom, Anom))eq, NULL)) {
     return type_new(bt, sub);
   } else {
-    printf("TYPE_BASE_CAST_ERROR: Upcast failure on %s, %s Incompatable types.", btype_to_str(type_base(t1)), btype_to_str(type_base(t2)));
+    fprintf(stderr, "TYPE_BASE_CAST_WARNING: Upcast failure on %s, %s Incompatable types.", btype_to_str(type_base(t1)), btype_to_str(type_base(t2)));
     type_destroy(type_new(bt, sub));
     return type_new(T_ERROR, NULL);
   }
 }
 
-
-bool type_assign_cast(Type lhs, Type rhs) {
-  if (lhs == NULL && rhs == NULL) {
-    printf("TYPE_BASE_CAST_WARNING: type_assign_cast: received NULL types.\n");
-    return true;
-  } else if (lhs == NULL || rhs == NULL) {
-    printf("TYPE_BASE_CAST_WARNING: type_assign_cast: received NULL and non NULL types.\n");
+bool void_list(Type t) {
+  if (t == NULL) {
     return false;
   }
-  bool eq(bool a, bool b) {
-    return a == b;
+  List sub = type_sub(t);
+  while (sub != NULL) {
+    Type subtype = list_head(sub);
+    if (subtype == NULL) {
+      return false;
+    }
+    if (type_base(subtype) == T_INT || type_base(subtype) == T_REAL || type_base(subtype) == T_BOOL) {
+      return true;
+    }
+    sub = type_sub(subtype);
   }
-  List sub = list_for_each_pair(type_sub(lhs), type_sub(rhs), (Anom (*)(Anom, Anom))type_assign_cast);
-  bool sub_incompat = (bool) list_find(sub, (bool (*)(Anom, Anom))eq, false);
-  list_destroy(sub);
-  return (can_assign_cast(type_base(lhs), type_base(rhs)) && !sub_incompat);
+  return false;
+}
+
+// TODO: fix discrepencies between this method and project2 specs for checking variable declarations 
+Type type_assign_cast(Type lhs, Type rhs, int line) {
+  Type ret;
+  if (lhs == NULL && rhs == NULL) {
+    fprintf(stderr, "TYPE_BASE_CAST_WARNING: type_assign_cast: received NULL types.\n");
+    ret = NULL;
+  } else if (lhs == NULL || rhs == NULL) {
+    fprintf(stderr, "TYPE_BASE_CAST_WARNING: type_assign_cast: received NULL and non-NULL type.\n");
+    if (lhs) {
+      ret = lhs;
+    } else {
+      ret = rhs;
+      }
+  }
+  if (lhs != NULL && type_base(lhs) != T_LIST) {
+    ret = lhs;
+    if (!type_eq(lhs, rhs)) {
+      fprintf(stderr, "ERROR: near line: %u TYpe mismatch on variable declaration.", line);
+    }
+  } else if (void_list(lhs)) {
+    if (void_list(rhs)) {
+      ret = lhs;
+      fprintf(stderr, "ERROR: near line: %u Unknown basic type for List, creating null list.", line);
+    } else {
+      ret = rhs;
+    }
+  }
+  return ret;
 }
 
 
@@ -189,3 +227,22 @@ bool type_list_valid(Type type) {
   return false;
 }
 
+
+//TODO: improve implementation to print out all type information.
+str type_to_str(Type type) {
+  return (str) btype_to_str(type_base(type));
+}
+
+
+bool type_list_type_defined(Type type) {
+  if (type == NULL) {
+    return false;
+  }
+  List sub = type_sub(type);
+  while (sub != NULL) {
+    if (type_base(list_head(sub)) == T_REAL || type_base(list_head(sub)) == T_INT || type_base(list_head(sub)) == T_BOOL) {
+      return true;
+    }
+  }
+  return false;
+}

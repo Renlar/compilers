@@ -44,6 +44,16 @@ List list_new() {
   return list;
 }
 
+List list_clone(List list, Anom (*clone)(Anom)) {
+  List n = list_new();
+  ListNode prev = NULL;
+  void make_node(Anom anom) {
+    prev = listnode_new(clone(anom), prev, NULL, n);
+  }
+  list_for_each(list, make_node);
+  return n;
+}
+
 
 ListNode listnode_new(Anom data, ListNode prev, ListNode next, List list) {
   ListNode node = malloc(sizeof_listnode);
@@ -285,7 +295,7 @@ ListNode list_find_node(List list, bool (*eq)(Anom, Anom), Anom element) {
   if (list != NULL) {
     ListNode cur = list->head;
     while (cur != NULL) {
-      if ((*eq)(element, cur->data)) {
+      if ((*eq)(cur->data, element)) {
         return cur;
       }
       cur = cur->next;

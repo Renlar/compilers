@@ -35,4 +35,6 @@ bool fun_ret_type_eq(Fun fun, Type type);
 
 bool fun_arg_type_eq(Fun fun, Type type);
 
+bool fun_takes_args(Fun fun, Type args);
+
 #endif//COMP_VAR

@@ -8,7 +8,10 @@
 %}
 
 %%
-[0-9]*"."[0-9]+ {return REAL;}
+
+[ \t\n\r]+ {}
+
+[0-9]*\.[0-9]+ {return REAL;}
 [0-9]+ { return INT; }
 
 "int" { return INT_T; }
@@ -55,8 +58,6 @@
 "tl" {return TL;}
 "nil" {return NIL;}
 
-[_a-z][_a-zA-Z0-9]* {return ID;}
-
 "," {return COM;}
 ";" {return S_COL;}
 ":" {return COL;}
@@ -65,5 +66,6 @@
 "[" {return LBRK;}
 "]" {return RBRK;}
 
-[ \t\n\r]+   {}
+[_a-z][_a-zA-Z0-9]* {return ID;}
+
 \(\*(\*[^\)]|\)|[^\*])*\*\) {} //ignore comments.

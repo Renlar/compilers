@@ -7,132 +7,136 @@ exit, a type error is simply printed out without any other side effect, so that 
 errors of an input code are printed out at once.
 
 scoping: scope.h and scope.c //need to add lineno input to var addition in scope or typecheck files in order to do error checking.
-    2.  Inside a single block, e.g., the global scope or a let block, each variable can be declared
-        exactly once. For example let val x = 1; val x = 2 in ... end is not allowed.
+                2.  Inside a single block, e.g., the global scope or a let block, each variable can be declared
+                    exactly once. For example let val x = 1; val x = 2 in ... end is not allowed.
 
 scoping: scope.h and scope.c
-    3.  Multiple declarations of the same variable are allowed if these declarations are inside
-        different blocks. If the blocks are nested, the inner declarations override the outer
-        ones.
+                3.  Multiple declarations of the same variable are allowed if these declarations are inside
+                    different blocks. If the blocks are nested, the inner declarations override the outer
+                    ones.
 
-typecheck_list:
-    5.  All list initializations of the form [e1, e2, ..., en] have type t1 list, where t1 is the type
-        of the elements inside the pair of []. All expressions e1, e2, ..., en must have the same
-        type (t1). The type of an empty list (described as []) is a null list.
+typecheck_list: FINISHED
+                5.  All list initializations of the form [e1, e2, ..., en] have type t1 list, where t1 is the type
+                    of the elements inside the pair of []. All expressions e1, e2, ..., en must have the same
+                    type (t1). The type of an empty list (described as []) is a null list.
 
-typecheck_dec:
-typecheck_fun_call:
-typecheck_fun_dec:
-    1.  All variables and functions must be declared using the val or fun keywards before they
-        are used. For example, x(y) is an error if either x or y has never been declared.
+scoping:
+typecheck_dec: FINISHED
+typecheck_fun_call: FINISHED
+typecheck_fun_dec: FINISHED
+                1.  All variables and functions must be declared using the val or fun keywards before they
+                    are used. For example, x(y) is an error if either x or y has never been declared.
 
-typecheck_dec:
-    6.  Each variables declared using the val keyword has a type the following forms.
-        (a) int, which represents the integer type;
-        (b) real, which represents the real (floating point number) type;
-        (c) t1 ref, where t1 is another type, to represent a pointer type that points to elements
-            of type t1;
-        (d) t1 list, where t1 is another type, to represent a list type, all elements of which
-            have type t1.
-        
-        In particular, if the following syntax is used to declare a variable x,
-          val x : t = v
-        the type of x should be t. Additionally, its initial value v must be an expression of
-        type t, with the only exception that if t is a list type, then v could be a null list type
-        (i.e., it is an empty list).
-        On the other hand, if the following syntax is used to declare a variable x,
-          val x = v
-        the type of x should be the type computed for expression v, with the only exception
-        that if v has the null list type (i.e., it is an empty list), an error should be reported
-        because the element type of x cannot be determined, and any subsequent access to x
-        would be an error as well.
+typecheck_dec: VERIFY
+typecheck_type_:
+                6.  Each variables declared using the val keyword has a type the following forms.
+                    (a) int, which represents the integer type;
+                    (b) real, which represents the real (floating point number) type;
+                    (c) t1 ref, where t1 is another type, to represent a pointer type that points to elements
+                        of type t1;
+                    (d) t1 list, where t1 is another type, to represent a list type, all elements of which
+                        have type t1.
 
-typecheck_fun_dec:
-    7.  Each variables declared using the fun keyword has a function type of the form t1 → t2,
-        where t1 and t2 are types of the input parameters and the function body (which is a
-        single expression and therefore should have a single type) respectively. If the function
-        has multiple parameters, t1 has a tuple type of the form (r1, r2, ..., rm), where r1, r2,
-        ..., rm are types of the first, second, ..., the mth parameters respectively. If m = 0
-        (i.e., the function has no parameter), t1 should be the void type.
-        For example, if the following syntax is used to declare a function foo,
-            fun foo(x1 : t1, x2 : t2, ..., xm : tm) = e
-        the type of foo should be (t1,t2,..., tm) → r, where r is the type of e, the function
-        body.
+                    In particular, if the following syntax is used to declare a variable x,
+                      val x : t = v
+                    the type of x should be t. Additionally, its initial value v must be an expression of
+                    type t, with the only exception that if t is a list type, then v could be a null list type
+                    (i.e., it is an empty list).
+                    On the other hand, if the following syntax is used to declare a variable x,
+                      val x = v
+                    the type of x should be the type computed for expression v, with
+typecheck_concat: FINISHED
+typecheck_list: FINISHED
+                    the only exception that if v has the null list type (i.e., it is an empty list), 
+                    an error should be reported because the element type of x cannot be determined,
+                    and any subsequent access to x would be an error as well.
 
-typecheck_ref:
-    8.  An expression ref e1 should have type t1 ref, where t1 is the type of expression e1.
+typecheck_fun_dec: FINISHED
+                7.  Each variables declared using the fun keyword has a function type of the form t1 → t2,
+                    where t1 and t2 are types of the input parameters and the function body (which is a
+                    single expression and therefore should have a single type) respectively. If the function
+                    has multiple parameters, t1 has a tuple type of the form (r1, r2, ..., rm), where r1, r2,
+                    ..., rm are types of the first, second, ..., the mth parameters respectively. If m = 0
+                    (i.e., the function has no parameter), t1 should be the void type.
+                    For example, if the following syntax is used to declare a function foo,
+                        fun foo(x1 : t1, x2 : t2, ..., xm : tm) = e
+                    the type of foo should be (t1,t2,..., tm) → r, where r is the type of e, the function
+                    body.
 
-typecheck_fun_call:
-    9.  When used in an expression !(e1), e1 must have a type in the form of t1 ref (i.e., it is
-        a reference cell of t1 values), and the result of !(e1) should have type t1.
+typecheck_ref: FINISHED
+                8.  An expression ref e1 should have type t1 ref, where t1 is the type of expression e1.
 
-typecheck_fun_call:
-    19. When used in a function call e1(e2), e1 must have a type of the form t1 → t2 (i.e., it
-        is a function), e2 must have type t1 (if t1 is a tuple, e2 must be a tuple of the same
-        size with matching element types), and the result of expression should have type t2.
+typecheck_fun_call: FINISHED
+                9.  When used in an expression !(e1), e1 must have a type in the form of t1 ref (i.e., it is
+                    a reference cell of t1 values), and the result of !(e1) should have type t1.
 
-typecheck_init_lang_defs:
-typecheck_fun_call:
-    10. When used in an expression hd(e1), e1 must have a type in the form of t1 list (i.e., it
-        is a list of t1 elements), and the result of hd(e1) should have type t1.
+typecheck_fun_call: FINISHED
+                19. When used in a function call e1(e2), e1 must have a type of the form t1 → t2 (i.e., it
+                    is a function), e2 must have type t1 (if t1 is a tuple, e2 must be a tuple of the same
+                    size with matching element types), and the result of expression should have type t2.
 
-typecheck_init_lang_defs:
-typecheck_fun_call:
-    11. When used in an expression tl(e1), e1 must have a type in the form of t1 list (i.e., it
-        is a list of t1 elements), and the result of tl(e1) should have type t1 list.
+typecheck_init_lang_defs: FINISHED
+typecheck_fun_call: FINISHED
+                10. When used in an expression hd(e1), e1 must have a type in the form of t1 list (i.e., it
+                    is a list of t1 elements), and the result of hd(e1) should have type t1.
 
-typecheck_init_lang_defs:
-typecheck_fun_call:
-    12. When used in an expression not(e1), e1 must have a boolean type, and the result of
-        not(e1) should have the boolean type.
+typecheck_init_lang_defs: FINISHED
+typecheck_fun_call: FINISHED
+                11. When used in an expression tl(e1), e1 must have a type in the form of t1 list (i.e., it
+                    is a list of t1 elements), and the result of tl(e1) should have type t1 list.
 
-typecheck_assign:
-    13. When used in an expression e1 := e2, e1 must have a type in the form of t1 ref, e2
-        must have type t1, and the result of e1 := e2 should have the void type .
+typecheck_init_lang_defs: FINISHED
+typecheck_fun_call:  FINISHED
+                12. When used in an expression not(e1), e1 must have a boolean type, and the result of
+                    not(e1) should have the boolean type.
 
-typecheck_concat:
-    14. When used in an expression e1 :: e2, e2 must have a type in the form of t1 list, e1
-        must have type t1, and the result of e1 :: e2 should have type t1 list.
+typecheck_assign: FNISHED
+                13. When used in an expression e1 := e2, e1 must have a type in the form of t1 ref, e2
+                    must have type t1, and the result of e1 := e2 should have the void type .
 
-typecheck_if:
-    20. When used in an expression if e1 then e2 else e3, e1 must have the boolean type, e2
-        and e3 must have the same type, and the result of the conditional expression should
-        have the same type as that of e2 and e3.
+typecheck_concat: VERIFY
+                14. When used in an expression e1 :: e2, e2 must have a type in the form of t1 list, e1
+                    must have type t1, and the result of e1 :: e2 should have type t1 list.
 
-typecheck_while:
-    21. When used in an expression while e1 do e2, e1 must have boolean type, and the result
-        of the while expression should have the void type.
+typecheck_if: FINISHED
+                20. When used in an expression if e1 then e2 else e3, e1 must have the boolean type, e2
+                    and e3 must have the same type, and the result of the conditional expression should
+                    have the same type as that of e2 and e3.
 
-typecheck_let:
-    23. when used in an let block let d1; d2; ...; dn in e end, all uses of local variables in
-        e must be consistent with their declarations, and the result of the let block has the 
-        same type as that of e.
+typecheck_while: FINISHED
+                21. When used in an expression while e1 do e2, e1 must have boolean type, and the result
+                    of the while expression should have the void type.
+            // I have a problem with this requirement the void type is not defined in project 1, also ml
+            // Specifies that while returns the result of the last expression evaluated every block structure.
 
+typecheck_let: FINISHED
+                23. when used in an let block let d1; d2; ...; dn in e end, all uses of local variables in
+                    e must be consistent with their declarations, and the result of the let block has the 
+                    same type as that of e.
 
+typecheck_const: FINISHED
+                4.  All integer values (e.g., 5, 27) have the int type; all floating point values (e.g., 7.9)
+                    have the real type.
 
-typecheck_const:
-    FINISHED: 4.  All integer values (e.g., 5, 27) have the int type; all floating point values (e.g., 7.9)
-                  have the real type.
+typecheck_arith: FINISHED
+                15. When used in an expression e1 and e2, both e1 and e2 must have the boolean type,
+                    and the result of the expression should have type boolean.
 
-typecheck_arith:
-    FINISHED: 15. When used in an expression e1 and e2, both e1 and e2 must have the boolean type,
-                  and the result of the expression should have type boolean.
+typecheck_arith: FINISHED    
+                16. When used in an expression e1 or e2, both e1 and e2 must have the boolean type, and
+                    the result of the expression should have type boolean.
 
-typecheck_arith:    
-    FINISHED: 16. When used in an expression e1 or e2, both e1 and e2 must have the boolean type, and
-                  the result of the expression should have type boolean.
+typecheck_arith: FINISHED
+                17. When used in an expression e1 op e2, where op could be =, <, or >, both e1 and e2
+                    must have the same type, and the result of the expression should have type boolean.
 
-typecheck_arith:
-    FINISHED: 17. When used in an expression e1 op e2, where op could be =, <, or >, both e1 and e2
-                  must have the same type, and the result of the expression should have type boolean.
-
-typecheck_arith:
-    FINISHED: 18. When used in an expression e1 op e2, where op could be +, −, ∗, or /, both e1 and e2
-                  must have the same type of either int or real, and the result of the expression should
-                  have the same type of int or real.
-BNF:
-    FINISHED: 22. When in a sequence of expressions e1; e2; ...; en, each sub-expression e1, e2, ..., en could
-                  have an arbitrary type, and the type of the overall expression is the type of en.
+typecheck_arith: FINISHED
+                18. When used in an expression e1 op e2, where op could be +, −, ∗, or /, both e1 and e2
+                    must have the same type of either int or real, and the result of the expression should
+                    have the same type of int or real.
+BNF: FINISHED
+                22. When in a sequence of expressions e1; e2; ...; en, each sub-expression e1, e2, ..., en could
+                    have an arbitrary type, and the type of the overall expression is the type of en.
 
 
     You are expected to build your project2 on top of your working directory for project1.

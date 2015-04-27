@@ -28,6 +28,8 @@ const int sizeof_list;
 
 List list_new();
 
+List list_clone(List list, Anom (*clone)(Anom));
+
 /*
  * Return the number of elements in this list.
  */
