@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "anom.h"
+#include "string.h"
 
 struct list;
 
@@ -127,7 +128,6 @@ void list_for_each(List list, void (*op)(Anom));
 
 List list_for_each_pair(List list1, List list2, Anom (*op)(Anom, Anom));
 
-//str list_to_string(List list, str (*element_to_str)(Anom));
-
+str list_to_str(List list, str (*element_to_str)(Anom));
 
 #endif//COMPLISTs

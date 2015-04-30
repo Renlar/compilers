@@ -18,5 +18,14 @@ void str_destroy(str s);
 
 bool str_empty(const str s);
 
+str str_concat(const str head, const str tail);
+
+str str_concat_clean(const str head, const str tail);
+
+str str_concat_clean_head(const str head, const str tail);
+
+str str_concat_clean_tail(const str head, const str tail);
+
+size_t str_len(str s);
 
 #endif//COMP_STRING

@@ -17,7 +17,7 @@ void var_destroy(Var var) {
   free(var);
 }
 
-str var_name(Var var) {
+const str var_name(Var var) {
   if (var == NULL) {
     printf("VAR_ERROR: var_name: received NULL argument, var.\n");
     return NULL;
@@ -25,7 +25,7 @@ str var_name(Var var) {
   return var->name;
 }
 
-str var_symbol(Var var) {
+const str var_symbol(Var var) {
   if (var == NULL) {
     printf("VAR_ERROR: var_symbol: received NULL argument, var.\n");
     return NULL;
@@ -51,4 +51,13 @@ bool var_name_eq(Var a, Var b) {
 
 bool var_type_eq(Var a, Var b) {
   return type_eq(var_type(a), var_type(b));
+}
+
+str var_to_str(Var var) {
+  str result = str_new("Var (Name: ");
+  result = str_concat_clean_head(result, var_name(var));
+  result = str_concat_clean_head(result, "Type: ");
+  result = str_concat_clean(result, type_to_str(var_type(var)));
+  result = str_concat_clean_head(result, ") ");
+  return result;
 }

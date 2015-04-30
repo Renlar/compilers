@@ -19,7 +19,7 @@ void fun_destroy(Fun fun) {
   free(fun);
 }
 
-str fun_name(Fun fun) {
+const str fun_name(Fun fun) {
   if (fun == NULL) {
     fprintf(stderr, "FUN_ERROR: fun_name: received NULL argument, fun.\n");
     return NULL;
@@ -27,7 +27,7 @@ str fun_name(Fun fun) {
   return fun->name;
 }
 
-str fun_symbol(Fun fun) {
+const str fun_symbol(Fun fun) {
   if (fun == NULL) {
     fprintf(stderr, "FUN_ERROR: fun_symbol: received NULL argument, fun.\n");
     return NULL;
@@ -67,4 +67,15 @@ bool fun_ret_type_eq(Fun fun, Type type) {
 
 bool fun_arg_type_eq(Fun fun, Type type) {
   return type_eq(fun_arg_type(fun), type);
+}
+
+str fun_to_str(Fun fun) {
+  str result = str_new("Var (Name: ");
+  result = str_concat_clean_head(result, fun_name(fun));
+  result = str_concat_clean_head(result, "Type: ");
+  result = str_concat_clean(result, type_to_str(fun_arg_type(fun)));
+  result = str_concat_clean_head(result, " -> ");
+  result = str_concat_clean(result, type_to_str(fun_ret_type(fun)));
+  result = str_concat_clean_head(result, ") ");
+  return result;
 }

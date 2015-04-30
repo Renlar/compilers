@@ -8,7 +8,7 @@ run: proj
 proj: driver.c proj.y proj.l 
 	flex proj.l 2>&1 | tee out/flex
 	bison proj.y --debug --verbose 2>&1 | tee out/bison
-	gcc $(copt) -ggdb -o proj -I. lib/string.c lib/list.c lib/type.c lib/var.c lib/fun.c lib/scope.c lib/typecheck.c driver.c proj.tab.c 2>&1 | tee out/gcc
+	gcc $(copt) -D DEBUG -ggdb -o proj -I. lib/string.c lib/list.c lib/type.c lib/var.c lib/fun.c lib/scope.c lib/typecheck.c driver.c proj.tab.c 2>&1 | tee out/gcc
 
 clean: 
 	rm proj lex.yy.c proj.tab.c

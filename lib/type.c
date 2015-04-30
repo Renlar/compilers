@@ -13,19 +13,23 @@ Type type_new(TYPE_BASE base, List sub) {
   Type type = malloc(sizeof_type);
   type->base = base;
   type->sub = sub;
-  if ((base != T_LIST && base != T_TUPLE && base != T_REF) && sub != NULL) {
-    fprintf(stderr, "TYPE_BASE_WARNING: found %s with subtypes, expected REF, LIST or TUPLE.\n", btype_to_str(base));
-  }
-  if (base == T_REF) {
-    if (list_size(sub) > 1) {
-      fprintf(stderr, "TYPE_BASE_WARNING: Found base type REF with more than a single subtype.\n");
+  
+  #ifdef DEBUG
+    if ((base != T_LIST && base != T_TUPLE && base != T_REF) && sub != NULL) {
+      fprintf(stderr, "TYPE_BASE_WARNING: found %s with subtypes, expected REF, LIST or TUPLE.\n", btype_to_str(base));
     }
-  }
-  if (base == T_LIST) {
-    if (!type_list_valid(type)) {
-      fprintf(stderr, "TYPE_BASE_WARNING: Found base type LIST with multiple subtypes, Expected single subtype.\n");
+    if (base == T_REF) {
+      if (list_size(sub) > 1) {
+        fprintf(stderr, "TYPE_BASE_WARNING: Found base type REF with more than a single subtype.\n");
+      }
     }
-  }
+    if (base == T_LIST) {
+      if (!type_list_valid(type)) {
+        fprintf(stderr, "TYPE_BASE_WARNING: Found base type LIST with multiple subtypes, Expected single subtype.\n");
+      }
+    }
+  #endif
+  
   return type;
 }
 
@@ -51,7 +55,9 @@ void type_destroy(Type t) {
 
 TYPE_BASE type_base(Type type) {
   if (type == NULL) {
-    fprintf(stderr, "TYPE_BASE_WARNING: type_base: received NULL argument, type.\n");
+    #ifdef DEBUG
+      fprintf(stderr, "TYPE_BASE_WARNING: type_base: received NULL argument, type.\n");
+    #endif
     return T_ERROR;
   }
   return type->base;
@@ -60,7 +66,9 @@ TYPE_BASE type_base(Type type) {
 
 List type_sub(Type type) {
   if (type == NULL) {
-    fprintf(stderr, "TYPE_BASE_WARNING: type_sub: received NULL argument, type.\n");
+    #ifdef DEBUG
+      fprintf(stderr, "TYPE_BASE_WARNING: type_sub: received NULL argument, type.\n");
+    #endif
     return NULL;
   }
   return type->sub;
@@ -124,10 +132,14 @@ bool void_list(Type t) {
 Type type_assign_cast(Type lhs, Type rhs, int line) {
   Type ret;
   if (lhs == NULL && rhs == NULL) {
-    fprintf(stderr, "TYPE_BASE_CAST_WARNING: type_assign_cast: received NULL types.\n");
+    #ifdef DEBUG
+      fprintf(stderr, "TYPE_BASE_CAST_WARNING: type_assign_cast: received NULL types.\n");
+    #endif
     ret = NULL;
   } else if (lhs == NULL || rhs == NULL) {
-    fprintf(stderr, "TYPE_BASE_CAST_WARNING: type_assign_cast: received NULL and non-NULL type.\n");
+    #ifdef DEBUG
+      fprintf(stderr, "TYPE_BASE_CAST_WARNING: type_assign_cast: received NULL and non-NULL type.\n");
+    #endif
     if (lhs) {
       ret = lhs;
     } else {
@@ -233,7 +245,13 @@ bool type_list_valid(Type type) {
 
 //TODO: improve implementation to print out all type information.
 str type_to_str(Type type) {
-  return (str) btype_to_str(type_base(type));
+  str result = str_new(btype_to_str(type_base(type)));
+  
+  if (type_sub(type) != NULL) {
+    result = str_concat_clean(result, list_to_str(type_sub(type), (str (*)(Anom))type_to_str));
+  }
+  
+  return result;
 }
 
 

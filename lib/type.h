@@ -9,8 +9,8 @@
 
 //The following two lines must be kept in sync otherwise messages will be 
 //incorrect and segfaults could result.
-typedef enum TYPE_BASE {T_ERROR, T_VOID, T_REF, T_BOOL, T_INT, T_REAL, T_LIST, T_TUPLE} TYPE_BASE;
-static const str TYPE_BASE_STR[] = {"ERROR", "VOID", "REF", "BOOL", "INT", "REAL", "LIST", "TUPLE"};
+typedef enum TYPE_BASE {T_NULL, T_ERROR, T_VOID, T_REF, T_BOOL, T_INT, T_REAL, T_LIST, T_TUPLE} TYPE_BASE;
+static const str TYPE_BASE_STR[] = {"NULL", "ERROR", "VOID", "REF", "BOOL", "INT", "REAL", "LIST", "TUPLE"};
 
 typedef struct type {
   TYPE_BASE base;

@@ -18,9 +18,9 @@ Var var_new(str name, Type type);
 
 void var_destroy(Var var);
 
-str var_name(Var var);
+const str var_name(Var var);
 
-str var_symbol(Var var);
+const str var_symbol(Var var);
 
 Type var_type(Var var);
 
@@ -29,5 +29,7 @@ bool var_eq(Var a, Var b);
 bool var_name_eq(Var a, Var b);
 
 bool var_type_eq(Var a, Var b);
+
+str var_to_str(Var var);
 
 #endif//COMP_VAR

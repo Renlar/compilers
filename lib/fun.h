@@ -19,9 +19,9 @@ Fun fun_new(str name, Type ret, Type par);
 
 void fun_destroy(Fun fun);
 
-str fun_name(Fun fun);
+const str fun_name(Fun fun);
 
-str fun_symbol(Fun fun);
+const str fun_symbol(Fun fun);
 
 Type fun_ret_type(Fun fun);
 
@@ -36,5 +36,7 @@ bool fun_ret_type_eq(Fun fun, Type type);
 bool fun_arg_type_eq(Fun fun, Type type);
 
 bool fun_takes_args(Fun fun, Type args);
+
+str fun_to_str(Fun fun);
 
 #endif//COMP_VAR

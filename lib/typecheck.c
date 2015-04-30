@@ -12,7 +12,6 @@ str op_to_str(OP op) {
   return OP_STR[op];
 }
 
-
 void typecheck_init() {
   current = scope_new("Global", NULL);
   typecheck_init_lang_defs();
@@ -37,6 +36,9 @@ void typecheck_destroy() {
 //============================================================================//
 
 Type typecheck_arith(Type t1, OP op, Type t2, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_arith input: %s %s %s line: %u\n", type_to_str(t1), op_to_str(op), type_to_str(t2), line);
+  #endif
   TYPE_BASE b;
   // Optimistic typing ignores type params when necessary to prevent type errors
   // from propigating as much as is feasable it is still possible the next
@@ -76,6 +78,9 @@ Type typecheck_arith(Type t1, OP op, Type t2, int line) {
 //TODO: method should be checked thourally against spec rules 6
 //TODO: ADD checks for VOID type and error on it.
 Type typecheck_concat(Type t1, Type t2, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_concat input: %s :: %s, line: %u\n", type_to_str(t1), type_to_str(t2), line);
+  #endif
   Type list;
   Type concat;
   // Simple comparison, types currently must be exactly the same to create a
@@ -119,6 +124,9 @@ Type typecheck_concat(Type t1, Type t2, int line) {
 
 
 Type typecheck_list(List types, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_list input: types: %s, line: %u\n", list_to_str(types, (str (*)(Anom))type_to_str), line);
+  #endif
   bool same = true;
   Type first = NULL;
   
@@ -147,6 +155,9 @@ Type typecheck_list(List types, int line) {
 
 
 Type typecheck_id_access(str name, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_id_access input: name: %s, line: %u\n", name, line);
+  #endif
   Type ret;
   Var var = scope_find_var(current, name);
   Fun fun = scope_find_fun(current, name);
@@ -173,11 +184,17 @@ Type typecheck_id_access(str name, int line) {
 
 
 Type typecheck_const(TYPE_BASE base, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_const input: basetype: %s, line: %u\n", btype_to_str(base), line);
+  #endif
   return type_new(base, NULL);
 }
 
 
 Type typecheck_fun_call(str name, Type args, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_fun_call input: name: %s, args: %s, line: %u\n", name, type_to_str(args), line);
+  #endif
   if (!strcmp(name, "hd") || !strcmp(name, "tl")) {
     if (type_base(args) != T_LIST) {
       fprintf(stderr, "ERROR: near line: %u, function %s received: %s, expected: LIST\n", line, name, type_to_str(args));
@@ -211,6 +228,9 @@ Type typecheck_fun_call(str name, Type args, int line) {
 
 
 void typecheck_fun_dec(str name, Type args, Type ret, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_fun_dec input: name: %s, args: %s, ret: %s, line: %u\n", name, type_to_str(args), type_to_str(ret), line);
+  #endif
   if (scope_get_fun(current, name)) {
     fprintf(stderr, "ERROR: line %u Redeclaration of identifier %s\n", line, name);
     return;
@@ -222,18 +242,27 @@ void typecheck_fun_dec(str name, Type args, Type ret, int line) {
 //TODO: check this method again for any error checking or type filtering that should be added.
 //TODO: ADD checks for VOID type and error on it.
 Type typecheck_tuple(List types, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_tuple input: types: %s, line: %u\n", list_to_str(types, (str (*)(Anom))type_to_str), line);
+  #endif
   return type_new(T_TUPLE, types);
 }
 
 //TODO: check this method again for any error checking/ type filtering that should be added.
 //TODO: ADD checks for VOID type and error on it.
 List typecheck_elements(Type type, List typelist, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_elements input: type: %s, typelist: %s, line: %u\n", type_to_str(type), list_to_str(typelist, (str (*)(Anom))type_to_str), line);
+  #endif
   list_prepend(typelist, type);
   return typelist;
 }
 
 
 Type typecheck_assign(str id, Type type, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_fun_call input: id: %s, type: %s, line: %u\n", id, type_to_str(type), line);
+  #endif
   Var var = get_var(id);
   if (var == NULL) {
     fprintf(stderr, "ERROR: Undefined identifier, line: %u,  Attempted to assign a value of type, %s, to identifier, \'%s\', which is not defined in the current scope.\n",
@@ -248,6 +277,9 @@ Type typecheck_assign(str id, Type type, int line) {
 
 
 Type typecheck_if(Type cond, Type b_then, Type b_else, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_if input: Type cond: %s, Type b_then: %s, Type b_else: %s, line: %u\n", type_to_str(cond), type_to_str(b_then), type_to_str(b_else), line);
+  #endif
   if (type_base(cond) != T_BOOL) {
     fprintf(stderr, "ERROR: Type Mismatch near line: %u, Expected: if %s,  Received: if %s\n",
             line, btype_to_str(T_BOOL), type_to_str(cond));
@@ -263,6 +295,9 @@ Type typecheck_if(Type cond, Type b_then, Type b_else, int line) {
 
 
 Type typecheck_while(Type cond, Type b_while, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_while input: Type cond: %s, Type b_while: %s, line: %u\n", type_to_str(cond), type_to_str(b_while), line);
+  #endif
   if (type_base(cond) != T_BOOL) {
     fprintf(stderr, "ERROR: Type Mismatch near line: %u, Expected: if %s,  Received: if %s\n",
             line, btype_to_str(T_BOOL), type_to_str(cond));
@@ -272,11 +307,17 @@ Type typecheck_while(Type cond, Type b_while, int line) {
 
 
 Type typecheck_let(Type b_in, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_let input: Type b_in: %s, line: %u\n", type_to_str(b_in), line);
+  #endif
   return b_in;
 }
 
 
 Type typecheck_dec(str id, Type type, Type b_eq, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_dec input: str id: %s, Type type: %s, Type b_eq: %s, line: %u\n", id, type_to_str(type), type_to_str(b_eq), line);
+  #endif
   if ((type = type_assign_cast(type, b_eq, line))) {
     add_var(var_new(id, type), line);
   }
@@ -285,6 +326,9 @@ Type typecheck_dec(str id, Type type, Type b_eq, int line) {
 
 
 Type typecheck_type_ref(Type sub_ref, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_type_ref input: Type sub_ref: %s, line: %u\n", type_to_str(sub_ref) , line);
+  #endif
   List list = list_new();
   if (sub_ref != NULL) {
     list_append(list, sub_ref);
@@ -294,6 +338,9 @@ Type typecheck_type_ref(Type sub_ref, int line) {
 
 
 Type typecheck_type_basic(TYPE_BASE base, Type ref, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_type_basic input: TYPE_BASE base: %s, Type reg: %s, line: %u\n",  btype_to_str(base), type_to_str(ref), line);
+  #endif
   Type ret;
   if (ref != NULL) {
     List sub = type_sub(ref);
@@ -310,6 +357,9 @@ Type typecheck_type_basic(TYPE_BASE base, Type ref, int line) {
 
 // TODO: double check logic
 Type typecheck_type_basic_list(Type base, Type list, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_type_basic_list input: Type base: %s, Type list: %s, line: %u\n",  type_to_str(base), type_to_str(list), line);
+  #endif
   Type ret;
   if (list != NULL) {
     ret = list;
@@ -331,6 +381,9 @@ Type typecheck_type_basic_list(Type base, Type list, int line) {
 
 
 Type typecheck_add_var(str name, Type type, int line) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: typecheck_add_var input: Str name: %s, Type type: %s, line: %u\n",  name, type_to_str(type), line);
+  #endif
   add_var(var_new(name, type), line);
   return type;
 }
@@ -346,22 +399,29 @@ int get_scope_depth() {
 
 
 void push_scope(str name) {
-  if (current == NULL) {
-    printf("SCOPE_WARNING: push_scope: Current scope is null. Pusing %s as global scope.\n", name);
-  }
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: push_scope: name: \"%s\"\n",  name);
+    if (current == NULL) {
+      fprintf(stderr, "SCOPE_WARNING: push_scope: Current scope is null. Pusing %s as global scope.\n", name);
+    }
+  #endif
   current = scope_new(name, current);
 }
 
 
 void pop_scope() {
-  if (current == NULL) {
-    printf("SCOPE_ERROR: pop_scope: FALTAL current scope is null.  Did you forget to push a global scope first?\n");
-    return;
-  }
-  if (scope_parent(current) == NULL) {
-    printf("SCOPE_ERROR: pop_scope: called when only global scope remains. Cowardly, Refusing to pop global scope.\n");
-    return;
-  }
+  #ifdef DEBUG
+    if (current == NULL) {
+      fprintf(stderr, "SCOPE_ERROR: pop_scope: FALTAL current scope is null.  Did you forget to push a global scope first?\n");
+      return;
+    }
+    if (scope_parent(current) == NULL) {
+      fprintf(stderr, "SCOPE_ERROR: pop_scope: called when only global scope remains. Cowardly, Refusing to pop global scope.\n");
+      return;
+    }
+    fprintf(stderr, "DEBUG: pop_scope: name: \"%s\"\n", scope_name(current));
+  #endif
+  
   Scope prev = current;
   current = scope_parent(current);
   scope_destroy(prev);
@@ -369,10 +429,13 @@ void pop_scope() {
 
 //TODO: add line based error reporting for existing variables.
 void add_var(Var var, int line) {
-  if (current == NULL) {
-    printf("SCOPE_ERROR: add_var: FALTAL current scope is null.  Did you forget to push a global scope first?\n");
-    return;
-  }
+  #ifdef DEFINE
+    fprintf(stderr, "DEBUG: add_var input: Var: %s, line: %u\n",  var_to_str(var), name);
+    if (current == NULL) {
+      fprintf(stderr, "SCOPE_ERROR: add_var: FALTAL current scope is null.  Did you forget to push a global scope first?\n");
+      return;
+    }
+  #endif
   if (scope_get_var(current, var_symbol(var)) || scope_get_fun(current, var_symbol(var))) {
     fprintf(stderr, "ERROR: line %u Redeclaration of identifier %s\n", line, var_symbol(var));
   }
@@ -381,5 +444,8 @@ void add_var(Var var, int line) {
 
 
 Var get_var(str symbol) {
+  #ifdef DEBUG
+    fprintf(stderr, "DEBUG: get_var input: Str symbol: %s\n",  symbol);
+  #endif
   return scope_find_var(current, symbol);
 }

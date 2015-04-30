@@ -351,6 +351,13 @@ ListNode list_get_node(List list, int pos) {
   return cur;
 }
 
-/*str list_to_string(List list, str (*element_to_str)(Anom)) {
-  
-}*/
+str list_to_str(List list, str (*element_to_str)(Anom)) {
+  str result = str_new("[ ");
+  void op (Anom anom) {
+    result = str_concat_clean(result, element_to_str(anom));
+    result = str_concat_clean_head(result, ", ");
+  }
+  list_for_each(list, op);
+  result = str_concat_clean_head(result, "]");
+  return result;
+}
