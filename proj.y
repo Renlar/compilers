@@ -50,12 +50,7 @@ mult :
           | paren     {$$ = $1;}
 paren :
             {push_scope("Begin paren");} LPAR repexp RPAR {pop_scope(); $$ = $2;}
-          | list      {$$ = $1;}
-list :
-            LBRK exp elements RBRK {$$ = typecheck_list(typecheck_elements($2, $3, yylineno), yylineno);}
-          | LBRK RBRK {$$ = typecheck_list(NULL, yylineno);}
-          | NIL {$$ = typecheck_list(NULL, yylineno);}
-          | val {$$ = $1;}
+          | val      {$$ = $1;}
 val :
             id_d      {$$ = typecheck_id_access($1, yylineno);}
           | INT       {$$ = typecheck_const(T_INT, yylineno);}
@@ -64,12 +59,16 @@ val :
           | NEG REAL  {$$ = typecheck_const(T_REAL, yylineno);}
           | BOOL      {$$ = typecheck_const(T_BOOL, yylineno);}
           | fun_call  {$$ = $1;}
+          | list      {$$ = $1;}
+list :
+            LBRK exp elements RBRK {$$ = typecheck_list(typecheck_elements($2, $3, yylineno), yylineno);}
+          | LBRK RBRK {$$ = typecheck_list(NULL, yylineno);}
+          | NIL {$$ = typecheck_list(NULL, yylineno);}
 fun_call :
-            id val {$$ = typecheck_fun_call($1, $2, yylineno);}
-          | id LPAR repexp RPAR  {$$ = typecheck_fun_call($1, $3, yylineno);}
-          | id_d val {$$ = typecheck_fun_call($1, $2, yylineno);}
-          | id_d LPAR repexp RPAR {$$ = typecheck_fun_call($1, $3, yylineno);}
-          | id_d tuple  {$$ = typecheck_fun_call($1, $2, yylineno);}
+            id val                {$$ = typecheck_fun_call($1, $2, yylineno);}
+          | id tuple              {$$ = typecheck_fun_call($1, $2, yylineno);}
+          | id_d val              {$$ = typecheck_fun_call($1, $2, yylineno);}
+          | id_d tuple            {$$ = typecheck_fun_call($1, $2, yylineno);}
 id :
             HD        {$$ = str_new(yytext);}
           | DREF      {$$ = str_new(yytext);}
@@ -80,10 +79,10 @@ id :
 id_d:   ID {$$ = str_new(yytext);}
 
 tuple :
-            LPAR exp elements RPAR        {$$ = typecheck_tuple(typecheck_elements($2, $3, yylineno), yylineno);}
+            LPAR repexp elements RPAR        {$$ = typecheck_tuple(typecheck_elements($2, $3, yylineno), yylineno);}
           | LPAR RPAR                 {$$ = typecheck_tuple(NULL, yylineno);}
 elements :
-            COM exp elements          {$$ = typecheck_elements($2, $3, yylineno);}
+            COM repexp elements          {$$ = typecheck_elements($2, $3, yylineno);}
           | epsilon                   {$$ = list_new();}
           
 /* block */
