@@ -164,5 +164,3 @@ while (0 < !a) do
 [] :: [[1],[2,3]];
 hd [1];
 tl [2];
-Status API Training Shop Blog About
-© 2015 GitHub, Inc. Terms Privacy Security Contact
