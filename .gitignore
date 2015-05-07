@@ -1,4 +1,6 @@
 .*
+!.keep
+!.empty
 !.gitignore
 /build/
 /out/
