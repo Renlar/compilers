@@ -1,10 +1,7 @@
 #include "type.hpp"
 
-BASE_TYPE base;
-TypeList& subtypes;
-
-Type::Type(){ //construtor is private it will never be calle
-  base = BASE_TYPE.NULL_T;
+Type::Type(){ //construtor is private it will never be called.
+  base = NULL_B;
 }
 
 /**
@@ -21,13 +18,11 @@ Type::Type(){ //construtor is private it will never be calle
  *                converted to a tuple when @this is created.
  * 
  */
-Type::Type(BASE_TYPE base, const TypeList subtypes){
-    this->base = base;
-    this->subtypes = subtypes;
+Type::Type(BASE_TYPE base, TypeList& subtypes) : base(base){
+  this->subtypes.insert(this->subtypes.end(), subtypes.begin(), subtypes.end());
 }
 
-Type::Type(BASE_TYPE base){
-  this->base = base;
+Type::Type(BASE_TYPE base) : base(base){
 }
 
 BASE_TYPE Type::get_base_type(){
@@ -35,7 +30,7 @@ BASE_TYPE Type::get_base_type(){
 }
 
 
-TypeList Type::get_subtypes(){
+TypeList& Type::get_subtypes(){
     return subtypes;
 }
 
@@ -58,14 +53,8 @@ TypeList Type::get_subtypes(){
  * 
  * @return true if @this is compatable with @type false otherwise.
  */
-bool Type::type_compat(Type_sptr type){
-    if(type != NULL){
-        if(base == type->get_base_type()){
-            return true;
-        }
-    }
+bool Type::type_compat(Type& type){
     return false;
-    
 }
 
 /**
@@ -79,7 +68,7 @@ bool Type::type_compat(Type_sptr type){
  * 
  * @return true if @rhs can be assigned to @this.
  */
-bool Type::can_assign(Type_sptr rhs){
+bool Type::can_assign(Type& rhs){
     return true;
 }
 
@@ -93,8 +82,8 @@ bool Type::can_assign(Type_sptr rhs){
  * @return the computed type for an assignment where @this is the var type
  *         and @rhs is the expression type.
  */
-Type_sptr Type::declare_type(Type_sptr rhs){
-    return this;
+Type& Type::declare_type(Type& rhs){
+    return *this;
 }
 
 /**
@@ -103,7 +92,7 @@ Type_sptr Type::declare_type(Type_sptr rhs){
  *         it must have another base type defined i.e. int, bool, or real.
  */
  bool Type::is_complete_type(){
-     return false;
+     return true;
  }
  
 /**
@@ -111,8 +100,8 @@ Type_sptr Type::declare_type(Type_sptr rhs){
  * @arg rhs the type to comare @this against.
  * @return true iff @this == @rhs
  */
-bool Type::equals(Type_sptr rhs){
-      if(rhs != NULL && rhs.get_base_type() == base){
+bool Type::equals(Type& rhs){ // TODO : add recursive call to check subtypes.
+      if(rhs.get_base_type() == base){
           return true;
       }else{
           return false;
@@ -135,4 +124,12 @@ std::string Type::to_string(){
  * 
  * @return a deep clone of this type.
  */
-Type_sptr Type::clone();
+Type& Type::clone() {
+  TypeList list(*(new TypeList()));
+  
+  for(auto it : this->subtypes) {
+    list.insert(list.end(), it.clone());
+  }
+  
+  return *(new Type(this->base, list));
+}

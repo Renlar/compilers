@@ -1,8 +1,7 @@
+//all rights reserved Jusin VanderBrake
 #include "ast.hpp"
 
 #include <string>
-#include <>
-//all rights reserved Jusin VanderBrake
 
 /**
  * Constructs a leaf node which may then be paired with another leaf and 
@@ -39,7 +38,7 @@ Ast::~Ast()
 ValExpressionList Ast::generate_expressions()
 {
   // yay recurtion.
-  return traverse_Tree(head);
+  return traverse_tree(head);
   // return NULL // just for alex. B-) but really this ---
   // --- std::pair<v22, v11 + v13>
 }
@@ -54,7 +53,7 @@ ValExpressionList Ast::generate_expressions()
   * @this the right node for the top of the new tree.
   * @return the augmented Ast.
   */
-Ast_sptr Ast::add_parent_left(OPERATOR op, Ast_sptr left)
+Ast_ptr Ast::add_parent_left(OPERATOR op, Ast_ptr left)
 {
   #ifdef DEBUG
     if (left == NULL)
@@ -66,7 +65,7 @@ Ast_sptr Ast::add_parent_left(OPERATOR op, Ast_sptr left)
       fprintf(stderr, "DEBUG: ast.cpp: add_parent_left(OPERATOR op, Ast left): left->head is NULL");
     }
   #endif
-  Node temp = newNode();
+  Node temp = new_node();
   temp.op = op;
   temp.left = left->head;
   head = temp;
@@ -76,7 +75,7 @@ Ast_sptr Ast::add_parent_left(OPERATOR op, Ast_sptr left)
 /**
  * same as the left but right(as opposed to wrong...)
  */
-Ast_sptr Ast::add_parent_right(OPERATOR op, Ast_sptr right)
+Ast_ptr Ast::add_parent_right(OPERATOR op, Ast_ptr right)
 {
   #ifdef DEBUG
     if (right == NULL)
@@ -88,7 +87,7 @@ Ast_sptr Ast::add_parent_right(OPERATOR op, Ast_sptr right)
       fprintf(stderr, "DEBUG: ast.cpp: add_parent_right(OPERATOR op, Ast right): right->head is NULL");
     }
   #endif
-  Node temp = newNode();
+  Node temp = new_node();
   temp.op = op;
   temp.right = right->head;
   head = temp;
@@ -97,7 +96,7 @@ Ast_sptr Ast::add_parent_right(OPERATOR op, Ast_sptr right)
 
 
 //allocates a new node on the heap and sets some default values
-Ast::Node Ast::newNode()
+Ast::Node Ast::new_node()
 {
   Node temp = malloc(sizeof(struct node));
   temp.leaf = false;
@@ -115,45 +114,43 @@ Ast::Node Ast::newNode()
  * the definition of a ValExpressionList is:
  * typedef std::vector<std::pair<Val_sptr, Expression_sptr> > ValExpressionList;
  */
-ValExpressionList Ast::traverse_Tree(Node current);
+ValExpressionList Ast::traverse_tree(Node current);
 {
+  ValExpression aPair;
+  
   // just the idea right now. NOT functional!
   if ((current->left == NULL) && (current->right == NULL))
   {// create a new list because we are at the bottom of the tree.
     ValExpressionList VEList = new ValExpressionList;
-    std::pair <Val_sptr, Expression_sptr> aPair;
-    aPair = std::make_pair(current.data ,NULL);
-    VEList.push_back (aPair);
+    // aPair = std::make_pair(current.data, NULL);  TIMOTHY RIGHT HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // VEList.push_back (aPair);
     return VEList;
   }
   else if (current->left == NULL)
   {
-    ValExpressionList rightData = traverse_Tree(current->right);
-    std::pair <Val_sptr, Expression_sptr> aPair;
-    aPair = std::make_pair(new Val(/*Type_sptr type*/),
-      new Expression(current->op, current->right->data, NULL));
+    ValExpressionList rightData = traverse_tree(current->right);
+    aPair = std::make_pair(new Val(current->right->data->get_type()),
+        new Expression(current->op, current->right->data, NULL));
     rightData.push_back (aPair);
   }
   else if (current->right == NULL)
   {
-    ValExpressionList leftData = traverse_Tree(current->left);
-    std::pair <Val_sptr, Expression_sptr> aPair;
-    aPair = std::make_pair(new Val(/*Type_sptr type*/),
-      new Expression(current->op, current->left->data, NULL));
+    ValExpressionList leftData = traverse_tree(current->left);
+    aPair = std::make_pair(new Val(current->right->data->get_type()),
+        new Expression(current->op, current->left->data, NULL));
     leftData.push_back (aPair);
   }
   else
   {
     ValExpressionList combined;
-    ValExpressionList leftData = traverse_Tree(current->left);
-    ValExpressionList rightData = traverse_Tree(current->right);
+    ValExpressionList leftData = traverse_tree(current->left);
+    ValExpressionList rightData = traverse_tree(current->right);
     combined.reserve(leftData.size() + rightData.size);
     combined.insert(combined.end(), leftData.begin(), leftData.end());
     combined.insert(combined.end(), rightData.begin(), rightData.end());
-    std::pair <Val_sptr, Expression_sptr> aPair;
     
     aPair = std::make_pair(new Val(/*Type_sptr type*/),
-      new Expression(current->op, current->left->data, current->right->data));
+        new Expression(current->op, current->left->data, current->right->data));
     combined.push_back (aPair);
   }
   
@@ -162,9 +159,30 @@ ValExpressionList Ast::traverse_Tree(Node current);
 
 
 /**
- * if you don't know what a to_String is...  well...
+ * if you don't know what a to_String is...  well... you shouldn't be reading
+ * this file.
+ * 
+ * anywho.  this outputs the ast to dot so that we can have a pretty output.
  */
-std::string Ast::to_string()
+void Ast::to_dot_format(std::streambuf out)
 {
+  out << "digraph G { /n";
+  to_string_r(head);
+  out << "}";
+}
+
+void AST::to_string_r(std::streambuf out, Node current)
+{
+  if(current->left != NULL)
+  {
+    out << node_to_string(current) << "->";
+    buffer << node_to_string(current->left) << endl;
+  }
+  if(current->right != NULL)
+  {
+    out << node_to_string(current) << "->";
+    out << node_to_string(current->right) << endl;
+  }
   
+  return out;
 }

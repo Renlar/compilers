@@ -2,8 +2,11 @@
 #ifndef COMP_AST
 #define COMP_AST
 
+#include <streambuf>
+
 #include "predec.hpp"
 #include "operator.hpp"
+#include "val.hpp"
 #include "expression.hpp"
 
 class Ast {
@@ -36,7 +39,7 @@ class Ast {
       * @this the right node for the top of the new tree.
       * @return the augmented Ast.
       */
-     Ast_sptr add_parent_left(OPERATOR op, Ast_sptr left);
+     Ast& add_parent_left(OPERATOR op, Ast& left);
      
      /**
       * Adds the passed in operator Ast pair as the parent of the current ast
@@ -46,18 +49,18 @@ class Ast {
       * @this the left node for the top of the new tree.
       * @return the augmented Ast.
       */
-     Ast_sptr add_parent_right(OPERATOR op, Ast_sptr right);
+     Ast& add_parent_right(OPERATOR op, Ast& right);
      
      /**
       * @return a deep clone of @this.
       */
-     Ast_sptr clone();
+     Ast& clone();
      
      /**
       * Generates a string representation of this ast for printing purposes.
       * Please see the project 3 requirements on the output format.
       */
-     std::string to_string();
+     void to_dot_format(std::streambuf out);
     
   protected:
     
@@ -75,7 +78,7 @@ class Ast {
       OPERATOR op;
       struct node* left;
       struct node* right;
-      Val_sptr data;
+      Val_ptr data;
     } node;
     typedef node* Node;
     /**
@@ -83,8 +86,9 @@ class Ast {
      */
     Node head;
     
-    Node newNode();
-    ValExpressionList traverseTree();
+    Node new_node();
+    ValExpressionList traverse_tree(Node current);
+    void to_string_r(std::streambuf out, Node current);
 };
 
 #endif

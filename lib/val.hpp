@@ -18,13 +18,13 @@ class Val {
      * Generates a unique Val where the symbol is of the form "V<uid>"
      * Type must be deep cloned to prevent data corruption.
      */
-    Val(const Type_sptr type);
+    Val(Type& type);
     
     /**
      * Generates a unique Val with the given symbol
      * Type must be deep cloned to prevent data corruption.
      */
-    Val(std::string name, const Type_sptr type);
+    Val(std::string name, Type& type);
     
     /**
      * Empty Destructor, no manual cleanup necessary
@@ -33,7 +33,7 @@ class Val {
     
     std::string get_symbol();
     
-    const Type_sptr get_type();
+    Type& get_type();
     
     size_t get_uid();
     
@@ -51,9 +51,9 @@ class Val {
      *          0 if @this == @val
      *          1 if @this > @val
      */
-    unsigned short val_compare(Val_sptr val);
+    short val_compare(Val& val);
     
-    unsigned short val_compare_uid(unsigned long o_uid);
+    short val_compare_uid(size_t o_uid);
     
     /**
      * Compares the types of @this and @val
@@ -82,7 +82,7 @@ class Val {
      * The unique id for this val.  Note: only unique among vals.
      */
     size_t uid;
-    Type_sptr type;
+    Type& type;
     //Note: if the type is a const then symbol contains the value of the const.
     std::string symbol;
     

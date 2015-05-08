@@ -1,6 +1,8 @@
 //all rights reserved Jusin VanderBrake
 #include "expression.hpp"
 
+#include <sstream>
+
 /**
  * create a new expression.
  * @implementer must check validity of input and report debug error if not
@@ -17,10 +19,10 @@ Expression::Expression(OPERATOR op){
   v2 = NULL;
 }
 
-Expression::Expression(OPERATOR op, Val_sptr v1){
+Expression::Expression(OPERATOR op, Val_ptr v1){
   #ifdef DEBUG
     if (OPERAND_COUNT[op] != 1) {
-      fprintf(stderr, "DEBUG: expression.c: Expression(OPERATOR op, Val_sptr v1): op, %s, requires %u arguments.", OPERATOR_STRING[op], OPERAND_COUNT[op];
+      fprintf(stderr, "DEBUG: expression.c: Expression(OPERATOR op, Val_ptr v1): op, %s, requires %u arguments.", OPERATOR_STRING[op], OPERAND_COUNT[op];
     }
   #endif
   this->op = op;
@@ -28,10 +30,10 @@ Expression::Expression(OPERATOR op, Val_sptr v1){
   this->v2 = NULL;
 }
 
-Expression::Expression(OPERATOR op, Val_sptr v1, Val_sptr v2){
+Expression::Expression(OPERATOR op, Val_ptr v1, Val_ptr v2){
   #ifdef DEBUG
   if (OPERAND_COUNT[op] != 2) {
-    fprintf(stderr, "DEBUG: expression.c: Expression(OPERATOR op, Val_sptr v1): op, %s, requires %u arguments.", OPERATOR_STRING[op], OPERAND_COUNT[op];
+    fprintf(stderr, "DEBUG: expression.c: Expression(OPERATOR op, Val_ptr v1): op, %s, requires %u arguments.", OPERATOR_STRING[op], OPERAND_COUNT[op];
   }
   #endif
   this->op = op;
@@ -48,27 +50,25 @@ OPERATOR Expression::get_op() const{
   return op;
 }
 
-Val_sptr Expression::get_arg1() const{
+Val_ptr Expression::get_arg1() const{
   return v1;
 }
 
 /**
  * @impelmenter print debug warning if arg2 is null.
  */
-Val_sptr Expression::get_arg2() const{
+Val_ptr Expression::get_arg2() const{
   return v2;
 }
 
-Type_sptr Expression::compute_type(){
+Type_ptr Expression::compute_type(){
   if(v1 != NULL && v2 != NULL){
-    Type_sptr v1Type = v1->get_type();
-    Type_sptr v2Type = v2->get_type();
+    Type_ptr v1Type = v1->get_type();
+    Type_ptr v2Type = v2->get_type();
     if(v1Type->get_base_type() == v2Type->get_base_type()){
       return v1Type;
     }else{
-      if(v1Type->get_base_type() == FUNCALL){
-        return v1Type;
-      }
+      return v1Type;
     }
   }else{
     // Both values are NULL;
@@ -80,17 +80,18 @@ Type_sptr Expression::compute_type(){
  * @return a valid ml representation of this expression.
  */
 std::string Expression::to_string() const{
-  std::string output;
+  std::stringbuf output;
+  
   if(v1 != NULL){
-    output += v1->to_string();
+    output << v1->to_string();
   }
   
-  output += OPERATOR_STRING[op];
+  output << OPERATOR_STRING[op];
   
   if(v2 != NULL){
-    output += v2->to_string();
+    output << v2->to_string();
   }
-  return output;
+  return output.str();
 }
 
 /**
@@ -101,8 +102,8 @@ std::string Expression::to_string() const{
  *              equal continue to comparing v2s then finally the operators.
  */
 bool Expression::operator< (const Expression& rhs){
-    Val_sptr ov1 = rhs.get_arg1();
-    Val_sptr ov2 = rhs.get_arg2();
+    Val_ptr ov1 = rhs.get_arg1();
+    Val_ptr ov2 = rhs.get_arg2();
     
     unsigned long ov1Compare;
     unsigned long ov2Compare;

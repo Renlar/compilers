@@ -5,7 +5,7 @@
 
 #include "predec.hpp"
 
-typedef enum {NULL_T, VOID_T, BOOL_T, INT_T, REAL_T, LIST_T, TUPLE_T, VAL_T, FUN_T} BASE_TYPE;
+typedef enum {NULL_B, VOID_B, BOOL_B, INT_B, REAL_B, LIST_B, TUPLE_B, VAL_B, FUN_B} BASE_TYPE;
 static const std::string BASE_TYPE_STRING[] = {"NULL", "VOID", "BOOL", "INT", "REAL", "LIST", "TUPLE", "VAL", "FUN"};
 
 
@@ -27,14 +27,14 @@ class Type {
      * 
      */
     Type(BASE_TYPE base);//create an empty typelist.
-    Type(BASE_TYPE base, const TypeList subtypes);
+    Type(BASE_TYPE base, TypeList& subtypes);
     ~Type();
     
     
     BASE_TYPE get_base_type();
     
     
-    TypeList get_subtypes();
+    TypeList& get_subtypes();
     
     
     /**
@@ -55,7 +55,7 @@ class Type {
      * 
      * @return true if @this is compatable with @type false otherwise.
      */
-    bool type_compat(Type_sptr type);
+    bool type_compat(Type& type);
     
     /**
      * Check if an assignment can be performed.
@@ -68,7 +68,7 @@ class Type {
      * 
      * @return true if @rhs can be assigned to @this.
      */
-    bool can_assign(Type_sptr rhs);
+    bool can_assign(Type& rhs);
     
     /**
      * Compute the type for a variable or function declairation.  May take type
@@ -80,7 +80,7 @@ class Type {
      * @return the computed type for an assignment where @this is the var type
      *         and @rhs is the expression type.
      */
-    Type_sptr declare_type(Type_sptr rhs);
+    Type& declare_type(Type& rhs);
     
     /**
      * 
@@ -94,7 +94,7 @@ class Type {
       * @arg rhs the type to comare @this against.
       * @return true iff @this == @rhs
       */
-      bool equals(Type rhs);
+      bool equals(Type& rhs);
     
     /**
      * Generate the type string for this type as required by the ml spec.
@@ -110,7 +110,7 @@ class Type {
      * 
      * @return a deep clone of this type.
      */
-    Type_sptr clone();
+    Type& clone();
     
   protected:
     
@@ -120,7 +120,7 @@ class Type {
     Type();
     
     BASE_TYPE base;
-    TypeList& subtypes;
+    TypeList subtypes;
 };
 
 #endif

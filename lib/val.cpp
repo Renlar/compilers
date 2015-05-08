@@ -1,54 +1,30 @@
 #include "val.hpp"
 
 /**
- * The unique id for this val.  Note: only unique among vals.
- */
-size_t uid;
-Type_sptr type;
-//Note: if the type is a const then symbol contains the value of the const.
-std::string symbol;
-
-/**
- * Private since a Val without a type would make code reconstrution
- * impossible for some statements.
- * e.g. val : int list a = ... and fun get_elem(a : int, b : int list) = ...
- */
-Val::Val(){
-  type = NULL;
-  uid = get_next_uid();
-}
-
-/**
  * Generates a unique Val where the symbol is of the form "V<uid>"
  * Type must be deep cloned to prevent data corruption.
  */
-Val::Val(const Type_sptr type){
-  this->type = type->clone();
-  uid = get_next_uid();
-}
+Val::Val(Type& type) : uid(get_next_uid()), type(type.clone()){}
 
 /**
  * Generates a unique Val with the given symbol
  * Type must be deep cloned to prevent data corruption.
  */
-Val::Val(std::string name, const Type_sptr type){
-  symbol = name;
-  this->type = type->clone();
-  uid = get_next_uid();
-}
+Val::Val(std::string name, Type& type) : uid(get_next_uid()), type(type.clone()), symbol(name){}
 
 
 size_t Val::get_next_uid() {
-    static size_t next_uid = -1;
+    static size_t next_uid = 0;
+    size_t uid = next_uid;
     next_uid++;
-    return next_uid;
+    return uid;
 }
 
 std::string Val::get_symbol(){
   return symbol;
 }
 
-const Type_sptr Val::get_type(){
+Type& Val::get_type(){
   return type;
 }
 
@@ -72,16 +48,11 @@ bool Val::symbol_equal(Val& val){
  *          0 if @this == @val
  *          1 if @this > @val
  */
-unsigned short Val::val_compare(Val_sptr val){
-  if(val != NULL){
-    unsigned long o_uid = val->get_uid();
-    return val_compare_uid(o_uid);
-  }else{
-    return 1;
-  }
+short Val::val_compare(Val& val){
+  return val_compare_uid(val.get_uid());
 }
 
-unsigned short Val::val_compare_uid(unsigned long o_uid){
+short Val::val_compare_uid(size_t o_uid){
     if(uid < o_uid){
       return -1;
     }else if(uid == o_uid){
@@ -96,9 +67,9 @@ unsigned short Val::val_compare_uid(unsigned long o_uid){
  * @return true if the types are compatable false otherwise.
  */
 bool Val::type_equal(Val& val){
-  return type == val.get_type();
+  return type.equals(val.get_type());
 }
 
 std::string Val::to_string(){
-  return symbol + ":" + type->to_string();
+  return symbol + ":" + type.to_string();
 }

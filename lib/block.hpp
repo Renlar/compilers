@@ -3,14 +3,14 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
+#include <utility>
 
 #include "predec.hpp"
 
 class Block {
   public:
     
-    Block(Scope_wptr parent);
+    Block(Scope& parent);
     
     ~Block();
     
@@ -18,17 +18,17 @@ class Block {
      * One or both pointers may be null depending on the block's position
      * in the flow graph.
      */
-    std::pair<Block_sptr, Block_sptr> get_follow();
+    std::pair<Block&, Block&> get_follow();
     
-    Scope_sptr get_parent();
+    Scope& get_parent();
     
-    std::string& get_name();
+    std::string& get_name() const;
     
-    void set_parent(Scope_wptr parent);
+    void set_parent(Scope& parent);
     
-    void set_ast(Ast_sptr ast);
+    void set_ast(Ast& ast);
     
-    Ast_sptr get_ast();
+    Ast& get_ast();
     
     
     
@@ -44,7 +44,12 @@ class Block {
     size_type uid;
     Scope_wptr parent;
     
-    std::pair<Block_sptr, Block_sptr> follow;
+    /**
+     * For backtracking purposes
+     */
+    WeakBlockList previous;
+    
+    std::pair<Block, Block> follow;
     
     /**
      * Stores the entire origional text for the block.
@@ -62,7 +67,7 @@ class Block {
      * values eliminated.  Assigns arbitrary names to each value may create 
      * additional assignments to facilitate redundant value elimination.
      */
-    ValMap& valmap;
+    ValMap valmap;
 };
 
 #endif

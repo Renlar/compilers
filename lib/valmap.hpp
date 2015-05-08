@@ -63,15 +63,6 @@ class ValMap {
      void update(ValMap& map);
      
      /**
-      * @implementer Do this last, I am still unsure if this is necessary.
-      * 
-      * Works almost exatcly the same as update, except we only add changes to
-      * the passed in map which apply outside of the scope of the block this map
-      * is tied to,
-      */
-     void apply(ValMap& map);
-     
-     /**
       * Performs a clone of the maps and code list
       */
      ValMap clone();

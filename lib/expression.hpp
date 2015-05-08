@@ -14,8 +14,8 @@ class Expression {
      *              valid.  i.e. check that the operator and agrument counts match.
      */
     Expression(OPERATOR op);
-    Expression(OPERATOR op, Val_sptr v1);
-    Expression(OPERATOR op, Val_sptr v1, Val_sptr v2);
+    Expression(OPERATOR op, Val_ptr v1);
+    Expression(OPERATOR op, Val_ptr v1, Val_ptr v2);
     
     ~Expression();
     
@@ -24,17 +24,17 @@ class Expression {
     /**
      * @impelmenter print debug warning if arg1 is null.
      */
-    Val_sptr get_arg1() const;
+    Val_ptr get_arg1() const;
     
     /**
      * @impelmenter print debug warning if arg2 is null.
      */
-    Val_sptr get_arg2() const;
+    Val_ptr get_arg2() const;
     
     /**
      * Find and return the type this expression generates when evaluated.
      */
-     Type_sptr compute_type();
+     Type_ptr compute_type();
     
     /**
      * comparison operator defined in order for std::map to work correctly with 
@@ -58,8 +58,8 @@ class Expression {
   private:
     Expression();
     OPERATOR op;
-    Val_sptr v1;
-    Val_sptr v2;
+    Val_ptr v1;
+    Val_ptr v2;
 };
 
 #endif//COMP_EXPRESSION
